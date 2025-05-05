@@ -28,6 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static("uploads"));
+
 // app.use((req, res, next) => {
 //   // Set the Access-Control-Allow-Origin header to allow requests from any origin
 //   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -45,19 +46,13 @@ app.use("/uploads", express.static("uploads"));
 //   next();
 // });
 
-// app.use(
-//   cors({
-//     origin: "*",
-//     credentials: true,
-//   })
-// );
-
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://api.taskplanner.co.uk','https://taskplanner.co.uk'], 
+    origin: "*",
     credentials: true,
-  }),
+  })
 );
+
 
 
 // application routes
