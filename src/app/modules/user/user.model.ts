@@ -118,6 +118,7 @@ const userSchema = new Schema<TUser, UserModel>(
       customEthnicity: { type: String },
       countryOfBirth: { type: String },
       maritalStatus: { type: String },
+      studentType: { type: String },
     },
     // Address Data
     addressData: {
@@ -145,6 +146,7 @@ const userSchema = new Schema<TUser, UserModel>(
       emergencyEmail: { type: String },
       emergencyFullName: { type: String },
       emergencyRelationship: { type: String },
+      emergencyAddress: { type: String },
     },
     // Compliance Data
     complianceData: {
@@ -164,16 +166,16 @@ const userSchema = new Schema<TUser, UserModel>(
       hasPassport: { type: Boolean },
       passportNumber: { type: String },
       passportExpiry: { type: String },
-      idDocument: { type: [String], default:[] },
+      idDocument: { type: [String], default: [] },
       hasCertificates: { type: Boolean },
       certificatesDetails: { type: String },
-      qualificationCertificates: { type: [String], default:[] },
-      cvResume: { type: [String], default:[] },
+      qualificationCertificates: { type: [String], default: [] },
+      cvResume: { type: [String], default: [] },
       hasProofOfAddress: { type: Boolean },
       proofOfAddressType: { type: String },
       proofOfAddressDate: { type: String },
-      proofOfAddress: { type: [String], default:[] },
-      otherDocuments: { type: [String], default:[] },
+      proofOfAddress: { type: [String], default: [] },
+      otherDocuments: { type: [String], default: [] },
       otherDocumentsDescription: { type: String },
     },
     // Employment Data
@@ -209,16 +211,27 @@ const userSchema = new Schema<TUser, UserModel>(
       acceptDataProcessing: { type: Boolean, default: false },
     },
     educationData: {
-      type: [{
-        institution: { type: String, required: true },
-        studyType: { type: String, required: true },
-        qualification: { type: String, required: true },
-        awardDate: { type: Date, required: true },
-        certificate: { type: String, optional: true },
-        transcript: { type: String, optional: true }
-      }],
-      default: []
+      educationData: {
+        type: [
+          {
+            institution: { type: String, required: true },
+            studyType: { type: String, required: true },
+            qualification: { type: String, required: true },
+            awardDate: { type: Date, required: true },
+            certificate: { type: String, default: null },
+            transcript: { type: String, default: null },
+          },
+        ],
+        default: [],
+      },
+      englishQualification: {
+        englishTestType: { type: String, default: null },
+        englishTestScore: { type: String, default: null },
+        englishTestDate: { type: Date, default: null },
+        englishCertificate: { type: String, default: null },
+      },
     },
+
     // Course Details
     courseDetailsData: {
       type: {
