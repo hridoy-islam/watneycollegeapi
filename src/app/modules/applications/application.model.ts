@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-this-alias */
 import bcrypt from "bcrypt";
 import { Schema, Types, model } from "mongoose";
 import config from "../../config";
@@ -111,18 +110,25 @@ const ApplicationSchema = new Schema<TApplication>(
       acceptTerms: { type: Boolean, default: false },
       acceptDataProcessing: { type: Boolean, default: false },
     },
-    educationData: {
-      type: [
-        {
-          institution: { type: String, required: true },
-          studyType: { type: String, required: true },
-          qualification: { type: String, required: true },
-          awardDate: { type: Date, required: true },
-          certificate: { type: String, optional: true },
-          transcript: { type: String, optional: true },
-        },
-      ],
-      default: [],
+    // Education Data - Updated structure to match form submission
+   educationData: {
+      type: {
+        educationData: [{
+          institution: { type: String },
+          studyType: { type: String },
+          qualification: { type: String },
+          awardDate: { type: Date },
+          certificate: { type: String },
+          transcript: { type: String }
+        }],
+        englishQualification: {
+          englishTestType: { type: String },
+          englishTestScore: { type: String },
+          englishTestDate: { type: Date },
+          englishCertificate: { type: String }
+        }
+      },
+      required: false
     },
     // Course Details
     courseDetailsData: {
