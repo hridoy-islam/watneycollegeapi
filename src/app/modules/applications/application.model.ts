@@ -11,7 +11,7 @@ const ApplicationSchema = new Schema<TApplication>(
       title: { type: String },
       firstName: { type: String },
       lastName: { type: String },
-      otherName: { type: String },
+      initial: { type: String },
       gender: { type: String },
       dateOfBirth: { type: Date },
       nationality: { type: String },
@@ -133,8 +133,8 @@ const ApplicationSchema = new Schema<TApplication>(
     // Course Details
     courseDetailsData: {
       type: {
-        course: { type: String, required: true },
-        intake: { type: String, required: true },
+        course: { type: Schema.Types.ObjectId, ref:"Course", required: true },
+        intake: { type: Schema.Types.ObjectId, ref:"Term", required: true },
       },
     },
   },
