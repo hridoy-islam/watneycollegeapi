@@ -7,6 +7,7 @@ import { UploadDocumentRoutes } from "../modules/documents/documents.route";
 import { ApplicationRoutes } from "../modules/applications/application.route";
 import { TermRoutes } from "../modules/term/term.route";
 import { CourseRoutes } from "../modules/course/course.route";
+import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
 
 const router = Router();
 
@@ -39,6 +40,10 @@ const moduleRoutes = [
   {
     path: "/courses",
     route: CourseRoutes,
+  },
+  {
+    path: "/application-course",
+    route: ApplicationCourseRoutes,
   },
  
 ];

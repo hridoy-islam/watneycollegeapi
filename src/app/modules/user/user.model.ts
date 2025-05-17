@@ -7,10 +7,7 @@ import { TUser, UserModel } from "./user.interface";
 
 const userSchema = new Schema<TUser, UserModel>(
   {
-    name: {
-      type: String,
-      required: true,
-    },
+    name: { type: String },
     email: {
       type: String,
       required: true,
@@ -134,13 +131,7 @@ const userSchema = new Schema<TUser, UserModel>(
       postalPostCode: { type: String },
       postalCountry: { type: String },
     },
-    // Contact Data
-    contactData: {
-      contactNumber: { type: String },
-      email: { type: String },
-      confirmEmail: { type: String },
-      preferredContactMethod: { type: String },
-    },
+ 
     emergencyContactData: {
       emergencyContactNumber: { type: String },
       emergencyEmail: { type: String },
@@ -148,7 +139,6 @@ const userSchema = new Schema<TUser, UserModel>(
       emergencyRelationship: { type: String },
       emergencyAddress: { type: String },
     },
-    // Compliance Data
     complianceData: {
       startDateInUK: { type: Date },
       niNumber: { type: String },
@@ -161,7 +151,6 @@ const userSchema = new Schema<TUser, UserModel>(
       convictionDetails: { type: String },
       studentFinance: { type: String },
     },
-    // Documents Data
     documentsData: {
       hasPassport: { type: Boolean },
       passportNumber: { type: String },
@@ -178,7 +167,6 @@ const userSchema = new Schema<TUser, UserModel>(
       otherDocuments: { type: [String], default: [] },
       otherDocumentsDescription: { type: String },
     },
-    // Employment Data
     employmentData: {
       isEmployed: { type: String },
       currentEmployment: {

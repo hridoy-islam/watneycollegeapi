@@ -17,7 +17,6 @@ const forgetPasswordValidationSchema = z.object({
 
 const createUserValidationSchema = z.object({
   body: z.object({
-    name: z.string({ required_error: "User Name is Required" }),
     email: z.string({ required_error: "User Email is Required" }),
     password: z.string({ required_error: "Password required" }),
   }),
