@@ -8,6 +8,7 @@ import { ApplicationRoutes } from "../modules/applications/application.route";
 import { TermRoutes } from "../modules/term/term.route";
 import { CourseRoutes } from "../modules/course/course.route";
 import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
+import { JobRoutes } from "../modules/job/job.route";
 
 const router = Router();
 
@@ -44,6 +45,10 @@ const moduleRoutes = [
   {
     path: "/application-course",
     route: ApplicationCourseRoutes,
+  },
+  {
+    path: "/jobs",
+    route: JobRoutes,
   },
  
 ];
