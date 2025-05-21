@@ -1,22 +1,21 @@
 /* eslint-disable no-unused-vars */
-import { Schema, model, Model } from 'mongoose';
+import { Schema, model, Model } from "mongoose";
+import { TJob } from "./job.interface";
 
-export interface TJob {
-  jobTitle: string;
-  applicationDeadline: Date;
-}
 
 const JobSchema = new Schema<TJob>(
   {
     jobTitle: { type: String, required: true },
     applicationDeadline: { type: Date, required: true },
+    status: {
+      type: Number,
+      enum: [0, 1],
+      default: 1,
+    },
   },
   {
     timestamps: true,
   }
 );
 
-export const Job: Model<TJob> = model<TJob>(
-  'Job',
-  JobSchema
-);
+export const Job: Model<TJob> = model<TJob>("Job", JobSchema);

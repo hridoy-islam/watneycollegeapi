@@ -1,3 +1,3 @@
 
 
-export const JobSearchableFields = [""];
+export const JobSearchableFields = ["jobTitle"];
