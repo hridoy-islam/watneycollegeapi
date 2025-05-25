@@ -6,7 +6,10 @@ import { TApplicationCourse } from "./applicationCourse.interface";
 import { ApplicationCourseSearchableFields } from "./applicationCourse.constant";
 
 const getAllApplicationCourseFromDB = async (query: Record<string, unknown>) => {
-  const ApplicationCourseQuery = new QueryBuilder(ApplicationCourse.find(), query)
+  const ApplicationCourseQuery = new QueryBuilder(ApplicationCourse.find().populate({
+      path: "studentId",
+      select: "title firstName initial lastName email phone",
+    }).populate('intakeId').populate('courseId'), query)
     .search(ApplicationCourseSearchableFields)
     .filter()
     .sort()

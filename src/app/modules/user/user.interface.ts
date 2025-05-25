@@ -140,38 +140,36 @@ export interface TermsData {
 
 export interface EducationEntry {
   institution: string;
-  studyType: string; 
+  studyType: string;
   qualification: string;
   awardDate: Date;
-  certificate?: string; 
+  certificate?: string;
   transcript?: string;
 }
 
 interface CourseDetail {
-  course: string; 
-  intake: string; 
+  course: string;
+  intake: string;
 }
 
-
-export interface emergencyContactData{
-  emergencyContactNumber: string,
-  emergencyEmail: string,
-  emergencyFullName: string,
-  emergencyRelationship: string,
+export interface emergencyContactData {
+  emergencyContactNumber: string;
+  emergencyEmail: string;
+  emergencyFullName: string;
+  emergencyRelationship: string;
 }
-
 
 export interface TUser {
   _id: Types.ObjectId;
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin" | "student";
-  status: "block" | "active";
+  role: "user" | "admin" | "student" | "applicant";
+  status: "block" | "active"; // assuming UserStatus enum includes these
   isDeleted: boolean;
   authorized: boolean;
   address?: string;
-  image?: string; 
+  image?: string;
   phone?: string;
   googleUid?: string;
   otp?: string;
@@ -179,20 +177,155 @@ export interface TUser {
   otpExpiry: Date;
   isUsed: boolean;
   isValided: boolean;
+  isCompleted: boolean;
   userAgentInfo: UserAgentInfo[];
-  
-  // Additional fields
-  personalDetails?: PersonalDetails;
-  addressData?: AddressData;
-  contactData?: ContactData;
-  complianceData?: ComplianceData;
-  documentsData?: DocumentsData;
-  employmentData?: EmploymentData;
-  termsData?: TermsData;
-  educationData?: EducationEntry;
-  courseDetailsData?: CourseDetail;
-  emergencyContactData: emergencyContactData;
-    createdAt?: Date;
+
+  // Personal Details (flattened)
+  title?: string;
+  firstName?: string;
+  lastName?: string;
+  otherName?: string;
+  initial:string;
+  gender?: string;
+  dateOfBirth?: Date;
+  nationality?: string;
+  ethnicity?: string;
+  customEthnicity?: string;
+  countryOfBirth?: string;
+  maritalStatus?: string;
+  studentType?: string;
+  requireVisa?: string;
+
+  // Address Data (flattened)
+  residentialAddressLine1?: string;
+  residentialAddressLine2?: string;
+  residentialCity?: string;
+  residentialPostCode?: string;
+  residentialCountry?: string;
+  sameAsResidential?: boolean;
+  postalAddressLine1?: string;
+  postalAddressLine2?: string;
+  postalCity?: string;
+  postalPostCode?: string;
+  postalCountry?: string;
+
+  // Emergency Contact
+  emergencyContactNumber?: string;
+  emergencyEmail?: string;
+  emergencyFullName?: string;
+  emergencyRelationship?: string;
+  emergencyAddress?: string;
+
+  // Compliance
+  startDateInUK?: Date;
+  niNumber?: string;
+  immigrationStatus?: string;
+  ltrCode?: string;
+  disability?: string;
+  disabilityDetails?: string;
+  benefits?: string;
+  criminalConviction?: string;
+  convictionDetails?: string;
+  studentFinance?: string;
+
+  // Documents
+  hasPassport?: boolean;
+  passportNumber?: string;
+  passportExpiry?: string;
+  idDocument?: string[]; // was any, updated to string[]
+  hasCertificates?: boolean;
+  certificatesDetails?: string;
+  qualificationCertificates?: string[];
+  cvResume?: string[];
+  hasProofOfAddress?: boolean;
+  proofOfAddressType?: string;
+  proofOfAddressDate?: string;
+  proofOfAddress?: string[];
+  otherDocuments?: string[];
+  otherDocumentsDescription?: string;
+
+  // Employment
+  isEmployed: string;
+  currentEmployment?: {
+    employer?: string;
+    jobTitle?: string;
+    startDate?: string;
+    employmentType?: string;
+    responsibilities?: string;
+    supervisor?: string;
+    contactPermission?: string;
+  };
+  previousEmployments?: {
+    employer: string;
+    jobTitle: string;
+    startDate: string;
+    endDate: string;
+    reasonForLeaving: string;
+    responsibilities: string;
+    contactPermission: string;
+  }[];
+  hasEmploymentGaps: string;
+  employmentGapsExplanation?: string;
+  declaration: boolean;
+
+  // Terms
+  acceptTerms: boolean;
+  acceptDataProcessing: boolean;
+
+  // Education
+  educationData: {
+    institution: string;
+    qualification: string;
+    awardDate: Date;
+    certificate?: string | null;
+    transcript?: string | null;
+  }[];
+
+  // Application Data
+  availableFromDate?: Date;
+  source?: string;
+
+  // Weekly Availability
+  availability?: {
+    [day: string]: boolean; // e.g. { Monday: true, Tuesday: false }
+  };
+
+  // Student and Pension Age
+  isStudent?: boolean;
+  isUnderStatePensionAge?: boolean;
+
+  // Referral Info
+  referralEmployee?: string;
+
+  // Career Section Flags
+  declarationCorrectUpload?: boolean;
+  declarationContactReferee?: boolean;
+  appliedBefore?: boolean;
+
+  // Disability and Adjustment Info
+  hasDisability?: boolean;
+  needsReasonableAdjustment?: boolean;
+  reasonableAdjustmentDetails?: string;
+
+  // Referee Info (optional block)
+  referee?: {
+    name: string;
+    organisation: string;
+    address: string;
+    relationship: string;
+    otherRelationship?: string;
+    email: string;
+    phone: string;
+  };
+  documents?: {
+    type: DocumentType;
+    fileUrl: string; // or filePath
+    customTitle?: string;
+  }[];
+
+  // TODO: Add missing `englishQualification` once structure is fully visible
+
+  createdAt?: Date;
   updatedAt?: Date;
 }
 

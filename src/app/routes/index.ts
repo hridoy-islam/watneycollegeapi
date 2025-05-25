@@ -4,7 +4,7 @@ import { AuthRoutes } from "../modules/auth/auth.router";
 
 import { NotificationsRoutes } from "../modules/notification/notification.route";
 import { UploadDocumentRoutes } from "../modules/documents/documents.route";
-import { ApplicationRoutes } from "../modules/applications/application.route";
+import { JobApplicationRoutes } from "../modules/jobApplications/jobApplication.route";
 import { TermRoutes } from "../modules/term/term.route";
 import { CourseRoutes } from "../modules/course/course.route";
 import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
@@ -31,8 +31,8 @@ const moduleRoutes = [
     route: UploadDocumentRoutes,
   },
   {
-    path: "/applications",
-    route: ApplicationRoutes,
+    path: "/application-job",
+    route: JobApplicationRoutes,
   },
   {
     path: "/terms",

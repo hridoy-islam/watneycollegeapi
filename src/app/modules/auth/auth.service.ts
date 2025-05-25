@@ -108,6 +108,7 @@ const checkLogin = async (payload: TLogin, req: any) => {
       role: foundUser?.role,
       authorized: foundUser?.authorized,
       isValided: foundUser?.isValided,
+      isCompleted: foundUser?.isCompleted
     };
 
     // If user is not authorized, generate OTP and send it
@@ -178,6 +179,9 @@ const refreshToken = async (token: string) => {
       email: foundUser.email,
       name: foundUser.name,
       role: foundUser.role,
+      authorized: foundUser?.authorized,
+      isValided: foundUser?.isValided,
+      isCompleted: foundUser?.isCompleted
     };
 
     // Generate new access token

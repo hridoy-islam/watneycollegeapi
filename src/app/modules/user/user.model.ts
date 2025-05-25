@@ -20,7 +20,7 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     role: {
       type: String,
-      enum: ["user", "admin", "student","applicant"],
+      enum: ["user", "admin", "student", "applicant"],
       default: "student",
     },
     status: {
@@ -66,6 +66,10 @@ const userSchema = new Schema<TUser, UserModel>(
       type: Boolean,
       default: false,
     },
+    isCompleted: {
+      type: Boolean,
+      default: false,
+    },
     userAgentInfo: {
       type: [
         {
@@ -102,131 +106,205 @@ const userSchema = new Schema<TUser, UserModel>(
       default: [],
       select: false,
     },
+
     // Personal Details
-    personalDetails: {
-      title: { type: String },
-      firstName: { type: String },
-      lastName: { type: String },
-      otherName: { type: String },
-      gender: { type: String },
-      dateOfBirth: { type: Date },
-      nationality: { type: String },
-      ethnicity: { type: String },
-      customEthnicity: { type: String },
-      countryOfBirth: { type: String },
-      maritalStatus: { type: String },
-      studentType: { type: String },
+    title: { type: String },
+    firstName: { type: String },
+    lastName: { type: String },
+    otherName: { type: String },
+    initial: { type: String },
+    gender: { type: String },
+    dateOfBirth: { type: Date },
+    nationality: { type: String },
+    ethnicity: { type: String },
+    customEthnicity: { type: String },
+    countryOfBirth: { type: String },
+    maritalStatus: { type: String },
+    studentType: { type: String },
+    requireVisa: { type: String },
+    applicationLocation: { type: String },
+    isBritishCitizen: { type: String },
+    shareCode: { type: String },
+    nationalInsuranceNumber: { type: String },
+    countryOfResidence: { type: String },
+    postalAddress: {
+      line1: { type: String },
+      line2: { type: String }, // optional
+      city: { type: String },
+      postCode: { type: String },
+      country: { type: String },
     },
     // Address Data
-    addressData: {
-      residentialAddressLine1: { type: String },
-      residentialAddressLine2: { type: String },
-      residentialCity: { type: String },
-      residentialPostCode: { type: String },
-      residentialCountry: { type: String },
-      sameAsResidential: { type: Boolean },
-      postalAddressLine1: { type: String },
-      postalAddressLine2: { type: String },
-      postalCity: { type: String },
-      postalPostCode: { type: String },
-      postalCountry: { type: String },
+    residentialAddressLine1: { type: String },
+    residentialAddressLine2: { type: String },
+    residentialCity: { type: String },
+    residentialPostCode: { type: String },
+    residentialCountry: { type: String },
+    sameAsResidential: { type: Boolean },
+    postalAddressLine1: { type: String },
+    postalAddressLine2: { type: String },
+    postalCity: { type: String },
+    postalPostCode: { type: String },
+    postalCountry: { type: String },
+
+    // Emergency Contact
+    emergencyContactNumber: { type: String },
+    emergencyEmail: { type: String },
+    emergencyFullName: { type: String },
+    emergencyRelationship: { type: String },
+    emergencyAddress: { type: String },
+
+    // Compliance
+    startDateInUK: { type: Date },
+    niNumber: { type: String },
+    immigrationStatus: { type: String },
+    ltrCode: { type: String },
+    disability: { type: String },
+    disabilityDetails: { type: String },
+    benefits: { type: String },
+    criminalConviction: { type: Boolean },
+    convictionDetails: { type: String },
+    studentFinance: { type: String },
+    visaRequired: { type: String },
+    enteredUKBefore: { type: String },
+    completedUKCourse: { type: String },
+    visaRefusal: { type: String },
+
+    // Documents
+    hasPassport: { type: Boolean },
+    passportNumber: { type: String },
+    passportExpiry: { type: String },
+    idDocument: { type: [String], default: [] },
+    hasCertificates: { type: Boolean },
+    certificatesDetails: { type: [String], default: [] },
+    qualificationCertificates: { type: [String], default: [] },
+    cvResume: { type: [String], default: [] },
+    hasProofOfAddress: { type: Boolean },
+    proofOfAddressType: { type: String },
+    proofOfAddressDate: { type: String },
+    proofOfAddress: { type: [String], default: [] },
+    otherDocuments: { type: [String], default: [] },
+    otherDocumentsDescription: { type: String },
+
+    // Employment
+    isEmployed: { type: String },
+    currentEmployment: {
+      employer: { type: String },
+      jobTitle: { type: String },
+      startDate: { type: String },
+      employmentType: { type: String },
+      responsibilities: { type: String },
+      supervisor: { type: String },
+      contactPermission: { type: String },
     },
- 
-    emergencyContactData: {
-      emergencyContactNumber: { type: String },
-      emergencyEmail: { type: String },
-      emergencyFullName: { type: String },
-      emergencyRelationship: { type: String },
-      emergencyAddress: { type: String },
-    },
-    complianceData: {
-      startDateInUK: { type: Date },
-      niNumber: { type: String },
-      status: { type: String },
-      ltrCode: { type: String },
-      disability: { type: String },
-      disabilityDetails: { type: String },
-      benefits: { type: String },
-      criminalConviction: { type: String },
-      convictionDetails: { type: String },
-      studentFinance: { type: String },
-    },
-    documentsData: {
-      hasPassport: { type: Boolean },
-      passportNumber: { type: String },
-      passportExpiry: { type: String },
-      idDocument: { type: [String], default: [] },
-      hasCertificates: { type: Boolean },
-      certificatesDetails: { type: String },
-      qualificationCertificates: { type: [String], default: [] },
-      cvResume: { type: [String], default: [] },
-      hasProofOfAddress: { type: Boolean },
-      proofOfAddressType: { type: String },
-      proofOfAddressDate: { type: String },
-      proofOfAddress: { type: [String], default: [] },
-      otherDocuments: { type: [String], default: [] },
-      otherDocumentsDescription: { type: String },
-    },
-    employmentData: {
-      isEmployed: { type: String },
-      currentEmployment: {
+    hasPreviousEmployment: { type: String },
+
+    previousEmployments: [
+      {
         employer: { type: String },
         jobTitle: { type: String },
         startDate: { type: String },
-        employmentType: { type: String },
+        endDate: { type: String },
+        reasonForLeaving: { type: String },
         responsibilities: { type: String },
-        supervisor: { type: String },
         contactPermission: { type: String },
       },
-      previousEmployments: [
+    ],
+    hasEmploymentGaps: { type: String },
+    employmentGapsExplanation: { type: String },
+    declaration: { type: Boolean, default: false },
+
+    // Terms
+    acceptTerms: { type: Boolean, default: false },
+    acceptDataProcessing: { type: Boolean, default: false },
+
+    // Education
+    educationData: {
+      type: [
         {
-          employer: { type: String },
-          jobTitle: { type: String },
-          startDate: { type: String },
-          endDate: { type: String },
-          reasonForLeaving: { type: String },
-          responsibilities: { type: String },
-          contactPermission: { type: String },
+          institution: { type: String },
+          qualification: { type: String },
+          awardDate: { type: Date },
+          grade: { type: String },
         },
       ],
-      hasEmploymentGaps: { type: String },
-      employmentGapsExplanation: { type: String },
-      declaration: { type: Boolean, default: false },
+      default: [],
     },
-    // Terms Data
-    termsData: {
-      acceptTerms: { type: Boolean, default: false },
-      acceptDataProcessing: { type: Boolean, default: false },
+
+    // Application Data
+    availableFromDate: { type: Date },
+    source: { type: String },
+
+    // Weekly Availability
+    availability: {
+      type: Map,
+      of: Boolean,
     },
-    educationData: {
-      educationData: {
-        type: [
-          {
-            institution: { type: String, required: true },
-            studyType: { type: String, required: true },
-            qualification: { type: String, required: true },
-            awardDate: { type: Date, required: true },
-            certificate: { type: String, default: null },
-            transcript: { type: String, default: null },
-          },
-        ],
-        default: [],
-      },
-      englishQualification: {
-        englishTestType: { type: String, default: null },
-        englishTestScore: { type: String, default: null },
-        englishTestDate: { type: Date, default: null },
-        englishCertificate: { type: String, default: null },
+
+    // Student and Pension Age
+    isStudent: { type: Boolean },
+    isUnderStatePensionAge: { type: Boolean },
+
+    // Referral Info
+    referralEmployee: { type: String },
+
+    // Career Section Flags
+    declarationCorrectUpload: { type: Boolean },
+    declarationContactReferee: { type: Boolean },
+    appliedBefore: { type: Boolean },
+
+    criminalConvictionDetails: { type: String },
+
+    // Disability and Adjustment Info
+    hasDisability: { type: Boolean },
+    needsReasonableAdjustment: { type: Boolean },
+    reasonableAdjustmentDetails: { type: String },
+    dataProcessingAccepted: { type: Boolean },
+    termsAccepted: { type: Boolean },
+    referee1: {
+      name: { type: String },
+      organisation: { type: String },
+      address: { type: String },
+      relationship: { type: String },
+      otherRelationship: { type: String },
+      email: { type: String },
+      phone: { type: String },
+    },
+    referee2: {
+      name: { type: String },
+      organisation: { type: String },
+      address: { type: String },
+      relationship: { type: String },
+      otherRelationship: { type: String },
+      email: { type: String },
+      phone: { type: String },
+    },
+
+    documents: {
+      type: [
+        {
+          type: { type: String }, // Replace with DocumentType if it's an enum
+          fileUrl: { type: String },
+          customTitle: { type: String },
+        },
+      ],
+      default: [],
+    },
+
+    englishQualification: {
+      type: {
+        englishTestType: { type: String },
+        englishTestScore: { type: String },
+        englishTestDate: { type: Date },
+        englishCertificate: { type: String },
       },
     },
 
-    // Course Details
-    courseDetailsData: {
-      type: {
-        course: { type: String, required: true },
-        intake: { type: String, required: true },
-      },
-    },
+    // declarationCorrectUpload: { type: Boolean },
+    // declarationContactReferee: { type: Boolean },
+    // criminalConviction: { type: Boolean },
+    // criminalConvictionDetails: { type: String },
+    // appliedBefore: { type: Boolean },
   },
   {
     timestamps: true,

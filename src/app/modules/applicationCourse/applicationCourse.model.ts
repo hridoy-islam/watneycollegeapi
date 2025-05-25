@@ -7,7 +7,8 @@ const ApplicationCourseSchema = new Schema<TApplicationCourse>(
   {
     courseId: { type: Schema.Types.ObjectId ,ref:'Course' },
     intakeId: { type: Schema.Types.ObjectId, ref: 'Term'},
-    studentType:{type: String}
+    studentId:{type: Schema.Types.ObjectId, ref: 'User', required: true },
+    seen:{ type: Boolean, default: false}
   },
   {
     timestamps: true,
