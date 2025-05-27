@@ -159,8 +159,7 @@ const userSchema = new Schema<TUser, UserModel>(
     niNumber: { type: String },
     immigrationStatus: { type: String },
     ltrCode: { type: String },
-    disability: { type: String },
-    disabilityDetails: { type: String },
+    
     benefits: { type: String },
     criminalConviction: { type: Boolean },
     convictionDetails: { type: String },
@@ -256,6 +255,8 @@ const userSchema = new Schema<TUser, UserModel>(
     criminalConvictionDetails: { type: String },
 
     // Disability and Adjustment Info
+    disability: { type: String },
+    disabilityDetails: { type: String },
     hasDisability: { type: Boolean },
     needsReasonableAdjustment: { type: Boolean },
     reasonableAdjustmentDetails: { type: String },
