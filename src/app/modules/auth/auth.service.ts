@@ -281,11 +281,11 @@ const createUserIntoDB = async (payload: TCreateUser) => {
     throw new AppError(httpStatus.NOT_FOUND, "This user is already exits!");
   }
 
-  // const { otp, otpExpiry } = generateOtpAndExpiry();
+  const { otp, otpExpiry } = generateOtpAndExpiry();
   const newUserPayload = {
     ...payload,
-    // otp,
-    // otpExpiry
+    otp,
+    otpExpiry
   };
 
   const result = await User.create(newUserPayload);
