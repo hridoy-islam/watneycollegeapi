@@ -46,13 +46,23 @@ app.use("/uploads", express.static("uploads"));
 //   next();
 // });
 
+// app.use(
+//   cors({
+//     origin: "*",
+//     credentials: true,
+//   })
+// );
+
 app.use(
   cors({
-    origin: "*",
+    origin: [
+      "http://localhost:5173",
+      "https://watneycollegeform.netlify.ap/",
+      
+    ],
     credentials: true,
   })
 );
-
 
 
 // application routes

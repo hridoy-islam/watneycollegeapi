@@ -53,13 +53,9 @@ const auth = (...requiredRoles: TUserRole[]) => {
       next();
     } catch (error) {
       if (error instanceof TokenExpiredError) {
-        throw new AppError(
-          httpStatus.UNAUTHORIZED,
-          "JWT Expired"
-        );
+        throw new AppError(httpStatus.UNAUTHORIZED, "JWT Expired");
       }
       next(error);
-
     }
   });
 };

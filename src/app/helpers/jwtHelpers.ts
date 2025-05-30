@@ -25,33 +25,29 @@
 //   return jwt.verify(token, secret) as JwtPayload;
 // };
 
-
-
 // export const jwtHelpers = {
 //   createToken,
 //   verifyToken,
 //   createResetToken
 // };
 
-
-
-import jwt, { JwtPayload } from 'jsonwebtoken'
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const createToken = (
   jwtPayload: JwtPayload,
   secret: string,
   options: {
-    expiresIn: string
-  },
+    expiresIn: string;
+  }
 ) => {
-  return jwt.sign(jwtPayload, secret, options)
-}
+  return jwt.sign(jwtPayload, secret, options);
+};
 
 const verifyToken = (token: string, secret: string) => {
-  return jwt.verify(token, secret)
-}
+  return jwt.verify(token, secret);
+};
 
 export const jwtHelpers = {
   createToken,
   verifyToken,
-}
+};
