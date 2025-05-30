@@ -195,6 +195,7 @@ export interface TUser {
   maritalStatus?: string;
   studentType?: string;
   requireVisa?: string;
+  countryOfDomicile?:string;
 
   // Address Data (flattened)
   residentialAddressLine1?: string;

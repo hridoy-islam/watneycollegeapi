@@ -118,6 +118,7 @@ const userSchema = new Schema<TUser, UserModel>(
     nationality: { type: String },
     ethnicity: { type: String },
     customEthnicity: { type: String },
+    countryOfDomicile: { type: String },
     countryOfBirth: { type: String },
     maritalStatus: { type: String },
     studentType: { type: String },
@@ -168,6 +169,7 @@ const userSchema = new Schema<TUser, UserModel>(
     enteredUKBefore: { type: String },
     completedUKCourse: { type: String },
     visaRefusal: { type: String },
+    visaRefusalDetail: { type: String },
 
     // Documents
     hasPassport: { type: Boolean },
@@ -225,6 +227,7 @@ const userSchema = new Schema<TUser, UserModel>(
           qualification: { type: String },
           awardDate: { type: Date },
           grade: { type: String },
+          certificate:{type: String}
         },
       ],
       default: [],

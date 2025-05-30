@@ -7,6 +7,7 @@ const JobSchema = new Schema<TJob>(
   {
     jobTitle: { type: String, required: true },
     applicationDeadline: { type: Date, required: true },
+    jobDetail:{type: String },
     status: {
       type: Number,
       enum: [0, 1],

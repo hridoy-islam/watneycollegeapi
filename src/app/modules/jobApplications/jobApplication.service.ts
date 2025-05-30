@@ -5,16 +5,41 @@ import { TJobApplication } from "./jobApplication.interface";
 import { JobApplication } from "./jobApplication.model";
 import AppError from "../../errors/AppError";
 import { application } from "express";
+import mongoose from "mongoose";
+
+
+
 
 const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
+  const { searchTerm, ...otherQueryParams } = query;
+
+  const processedQuery: Record<string, any> = { ...otherQueryParams };
+
+  
+  // 🔍 Handle global search using searchTerm
+  if (searchTerm && typeof searchTerm === 'string') {
+    const searchRegex = new RegExp(searchTerm.trim(), 'i');
+
+    JobApplicationSearchableFields.forEach((field) => {
+      processedQuery[`$expr`] = processedQuery[`$expr`] || {};
+      processedQuery[`$expr`][`$regexMatch`] = processedQuery[`$expr`][`$regexMatch`] || {};
+      
+      // Push each field into an OR-like structure using $or array
+      processedQuery[`$expr`][`$regexMatch`]["input"] = `$${field}`;
+      processedQuery[`$expr`][`$regexMatch`]["regex"] = searchRegex;
+    });
+  }
+
+
   const ApplicationQuery = new QueryBuilder(
-    JobApplication.find().populate("jobId").populate({
-      path: "applicantId",
-      select: "title firstName initial lastName email phone",
-    }),
-    query
+    JobApplication.find()
+      .populate("jobId")
+      .populate({
+        path: "applicantId",
+        select: "title firstName initial lastName email phone",
+      }),
+    processedQuery
   )
-    .search(JobApplicationSearchableFields)
     .filter()
     .sort()
     .paginate()
@@ -28,6 +53,8 @@ const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
     result,
   };
 };
+
+
 
 const getSingleJobApplicationFromDB = async (id: string) => {
   const result = await JobApplication.findById(id).populate("jobId");
