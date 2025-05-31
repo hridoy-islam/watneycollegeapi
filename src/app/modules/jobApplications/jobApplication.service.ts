@@ -6,6 +6,7 @@ import { JobApplication } from "./jobApplication.model";
 import AppError from "../../errors/AppError";
 import { application } from "express";
 import mongoose from "mongoose";
+import { sendEmail } from "../../utils/sendEmail";
 
 
 
@@ -82,6 +83,30 @@ const createJobApplicationIntoDB = async (
   payload: Partial<TJobApplication>
 ) => {
   const result = await JobApplication.create(payload);
+
+  const populatedResult = await JobApplication.findById(result._id)
+    .populate<{ jobTitle: string }>("jobId", "jobTitle") 
+    .populate<{ name: string; email: string }>("applicantId", "name email"); 
+
+  if (!populatedResult) {
+    throw new Error("Failed to populate job application");
+  }
+
+  const title = populatedResult.jobId.jobTitle;
+  const applicantName = populatedResult.applicantId.name;
+  const applicantEmail = populatedResult.applicantId.email;
+
+  const emailSubject = `New Application for ${title}`;
+const otp= ''
+  await sendEmail(
+    applicantEmail,
+    "job-application",
+    emailSubject,
+    applicantName,
+    otp,
+    title
+  );
+
   return result;
 };
 

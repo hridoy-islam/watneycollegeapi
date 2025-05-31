@@ -6,53 +6,41 @@ export const sendEmail = async (
   to: string,
   template: string,
   subject: string,
-  username: string,
-  otp?: string
+  name: string,
+  otp?: string,
+  title?: string
 ) => {
   const transporter = nodemailer.createTransport({
-    host: "smtp-relay.gmail.com",
-    port: 587,
-    secure: false,
-
+    // host: "smtp.ionos.co.uk",
+    // port: 587,
+    // secure: false,
+    service: "Gmail",
     auth: {
-      // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-      user: "noreply@taskplanner.co.uk",
-      pass: "ddgc rryi lucp ckwx",
-    },
-    tls: {
-      rejectUnauthorized: false,
+      user: "mahitasnimulhasan20@gmail.com",
+      pass: "zgyo izhr jrkh twgp",
     },
   });
 
-  ejs.renderFile(
-    __dirname + "/../static/email_template/" + template + ".ejs",
-    {
-      name: username,
-      next_action: "https://taskplanner.co.uk/login",
-      support_url: "https://taskplanner.co.uk",
-      action_url: "https://taskplanner.co.uk/login",
-      login_url: "https://taskplanner.co.uk/login",
-      username,
-      otp,
-    },
-    function (err: any, data: any) {
-      if (err) {
-        console.log(err);
-      } else {
-        var mainOptions = {
-          from: "noreply@taskplanner.co.uk",
-          to,
-          subject,
-          html: data,
-        };
-        transporter.sendMail(mainOptions, function (err, info) {
-          if (err) {
-            console.log(err);
-          } else {
-            console.log("Message sent: " + info.response);
-          }
-        });
+  try {
+    const html = await ejs.renderFile(
+      __dirname + "/../static/email_template/" + template + ".ejs",
+      {
+        otp: otp,
+        name: name,
+        title: title,
       }
-    }
-  );
+    );
+    const mailOptions = {
+      from: "mahitasnimulhasan20@gmail.com",
+      to,
+      subject,
+      html: html,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    return info;
+  } catch (error) {
+    console.error("Error sending email:", error);
+    throw error;
+  }
 };

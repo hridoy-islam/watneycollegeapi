@@ -4,6 +4,7 @@ import AppError from "../../errors/AppError";
 import { ApplicationCourse } from "./applicationCourse.model";
 import { TApplicationCourse } from "./applicationCourse.interface";
 import { ApplicationCourseSearchableFields } from "./applicationCourse.constant";
+import { sendEmail } from "../../utils/sendEmail";
 
 const getAllApplicationCourseFromDB = async (query: Record<string, unknown>) => {
   const ApplicationCourseQuery = new QueryBuilder(ApplicationCourse.find().populate({
@@ -45,8 +46,35 @@ const updateApplicationCourseIntoDB = async (id: string, payload: Partial<TAppli
 };
 
 
-const createApplicationCourseIntoDB = async (payload: Partial<TApplicationCourse>) => {
+const createApplicationCourseIntoDB = async (
+  payload: Partial<TApplicationCourse>
+) => {
   const result = await ApplicationCourse.create(payload);
+
+  const populatedResult = await ApplicationCourse.findById(result._id)
+    .populate<{ courseTitle: string }>("courseId", "name")
+    .populate<{ name: string; email: string }>("studentId", "name email");
+
+  if (!populatedResult) {
+    throw new Error("Failed to populate course application");
+  }
+
+  const title = populatedResult.courseId.name;
+  const applicantName = populatedResult.studentId.name;
+  const applicantEmail = populatedResult.studentId.email;
+
+  const emailSubject = `Thank You for Applying to ${title}`;
+  const otp = ""; 
+
+  await sendEmail(
+    applicantEmail,
+    "course-register", // make sure this template exists
+    emailSubject,
+    applicantName,
+    otp,
+    title
+  );
+
   return result;
 };
 

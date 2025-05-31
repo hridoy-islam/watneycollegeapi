@@ -112,24 +112,24 @@ const checkLogin = async (payload: TLogin, req: any) => {
     };
 
     // If user is not authorized, generate OTP and send it
-    // if (!foundUser.isValided) {
-    //   const { otp, otpExpiry } = generateOtpAndExpiry();
+    if (!foundUser.isValided) {
+      const { otp, otpExpiry } = generateOtpAndExpiry();
 
-    //   await User.findByIdAndUpdate(foundUser._id, {
-    //     otp,
-    //     otpExpiry,
-    //     isUsed: false,
-    //   });
+      await User.findByIdAndUpdate(foundUser._id, {
+        otp,
+        otpExpiry,
+        isUsed: false,
+      });
 
-    //   const emailSubject = "Validate Your Profile with OTP";
-    //   await sendEmail(
-    //     foundUser.email,
-    //     "reset_password_template",
-    //     emailSubject,
-    //     foundUser.name,
-    //     otp
-    //   );
-    // }
+      const emailSubject = "Validate Your Profile with OTP";
+      await sendEmail(
+        foundUser.email,
+        "verify_email",
+        emailSubject,
+        foundUser.name,
+        otp
+      );
+    }
 
     // Generate access and refresh tokens
     const accessToken = createToken(
@@ -314,20 +314,26 @@ const createUserIntoDB = async (payload: TCreateUser) => {
 };
 
 const EmailSendOTP = async (email: string) => {
-  const user = await User.isUserExists(email);
-  if (!user) {
+  const foundUser = await User.isUserExists(email);
+  if (!foundUser) {
     throw new AppError(httpStatus.NOT_FOUND, "No User Found");
   }
   const { otp, otpExpiry } = generateOtpAndExpiry();
 
-  const emailSubject = "Validate Your Profile with OTP";
-  // await sendEmail(
-  //   user.email,
-  //   "reset_password_template",
-  //   emailSubject,
-  //   user.name,
-  //   otp
-  // );
+  await User.findByIdAndUpdate(foundUser._id, {
+    otp,
+    otpExpiry,
+    isUsed: false,
+  });
+  const emailSubject = "Your Password Reset OTP";
+
+  await sendEmail(
+    email,
+    "reset_password_template",
+    emailSubject,
+    foundUser.name,
+    otp
+  );
 
   await User.updateOne({ email }, { otp, otpExpiry });
 };
@@ -462,13 +468,13 @@ const requestOtp = async (email: string) => {
   });
   const emailSubject = "Your Password Reset OTP";
 
-  // await sendEmail(
-  //   email,
-  //   "reset_password_template",
-  //   emailSubject,
-  //   foundUser.name,
-  //   otp
-  // );
+  await sendEmail(
+    email,
+    "reset_password_template",
+    emailSubject,
+    foundUser.name,
+    otp
+  );
 };
 
 const validateOtp = async (email: string, otp: string) => {
