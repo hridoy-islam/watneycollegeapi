@@ -284,8 +284,8 @@ const createUserIntoDB = async (payload: TCreateUser) => {
   const { otp, otpExpiry } = generateOtpAndExpiry();
   const newUserPayload = {
     ...payload,
-    otp,
-    otpExpiry
+    // otp,
+    // otpExpiry
   };
 
   const result = await User.create(newUserPayload);
@@ -351,7 +351,7 @@ export const verifyEmailIntoDB = async (email: string, otp: string) => {
   }
 
   // Check OTP expiry using moment
-  if (foundUser.otpExpires && moment().isAfter(moment(foundUser.otpExpires))) {
+  if (foundUser.otpExpiry && moment().isAfter(moment(foundUser.otpExpiry))) {
     throw new AppError(httpStatus.BAD_REQUEST, "OTP has expired");
   }
 
@@ -481,7 +481,6 @@ const validateOtp = async (email: string, otp: string) => {
   // Check if the user exists
   const foundUser = await User.isUserExists(email);
   if (!foundUser) {
-    console.log("User not found for email:", email);
     throw new AppError(httpStatus.NOT_FOUND, "Email not found");
   }
 

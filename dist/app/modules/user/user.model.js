@@ -19,10 +19,7 @@ const mongoose_1 = require("mongoose");
 const config_1 = __importDefault(require("../../config"));
 const user_constant_1 = require("./user.constant");
 const userSchema = new mongoose_1.Schema({
-    name: {
-        type: String,
-        required: true,
-    },
+    name: { type: String },
     email: {
         type: String,
         required: true,
@@ -35,7 +32,7 @@ const userSchema = new mongoose_1.Schema({
     },
     role: {
         type: String,
-        enum: ["user", "admin", "student"],
+        enum: ["user", "admin", "student", "applicant"],
         default: "student",
     },
     status: {
@@ -81,6 +78,10 @@ const userSchema = new mongoose_1.Schema({
         type: Boolean,
         default: false,
     },
+    isCompleted: {
+        type: Boolean,
+        default: false,
+    },
     userAgentInfo: {
         type: [
             {
@@ -118,126 +119,189 @@ const userSchema = new mongoose_1.Schema({
         select: false,
     },
     // Personal Details
-    personalDetails: {
-        title: { type: String },
-        firstName: { type: String },
-        lastName: { type: String },
-        otherName: { type: String },
-        gender: { type: String },
-        dateOfBirth: { type: Date },
-        nationality: { type: String },
-        ethnicity: { type: String },
-        customEthnicity: { type: String },
-        countryOfBirth: { type: String },
-        maritalStatus: { type: String },
+    title: { type: String },
+    firstName: { type: String },
+    lastName: { type: String },
+    otherName: { type: String },
+    initial: { type: String },
+    gender: { type: String },
+    dateOfBirth: { type: Date },
+    nationality: { type: String },
+    ethnicity: { type: String },
+    customEthnicity: { type: String },
+    countryOfDomicile: { type: String },
+    countryOfBirth: { type: String },
+    maritalStatus: { type: String },
+    studentType: { type: String },
+    requireVisa: { type: String },
+    applicationLocation: { type: String },
+    isBritishCitizen: { type: String },
+    shareCode: { type: String },
+    nationalInsuranceNumber: { type: String },
+    countryOfResidence: { type: String },
+    postalAddress: {
+        line1: { type: String },
+        line2: { type: String },
+        city: { type: String },
+        postCode: { type: String },
+        country: { type: String },
     },
     // Address Data
-    addressData: {
-        residentialAddressLine1: { type: String },
-        residentialAddressLine2: { type: String },
-        residentialCity: { type: String },
-        residentialPostCode: { type: String },
-        residentialCountry: { type: String },
-        sameAsResidential: { type: Boolean },
-        postalAddressLine1: { type: String },
-        postalAddressLine2: { type: String },
-        postalCity: { type: String },
-        postalPostCode: { type: String },
-        postalCountry: { type: String },
+    residentialAddressLine1: { type: String },
+    residentialAddressLine2: { type: String },
+    residentialCity: { type: String },
+    residentialPostCode: { type: String },
+    residentialCountry: { type: String },
+    sameAsResidential: { type: Boolean },
+    postalAddressLine1: { type: String },
+    postalAddressLine2: { type: String },
+    postalCity: { type: String },
+    postalPostCode: { type: String },
+    postalCountry: { type: String },
+    // Emergency Contact
+    emergencyContactNumber: { type: String },
+    emergencyEmail: { type: String },
+    emergencyFullName: { type: String },
+    emergencyRelationship: { type: String },
+    emergencyAddress: { type: String },
+    // Compliance
+    startDateInUK: { type: Date },
+    niNumber: { type: String },
+    immigrationStatus: { type: String },
+    ltrCode: { type: String },
+    benefits: { type: String },
+    criminalConviction: { type: Boolean },
+    convictionDetails: { type: String },
+    studentFinance: { type: String },
+    visaRequired: { type: String },
+    enteredUKBefore: { type: String },
+    completedUKCourse: { type: String },
+    visaRefusal: { type: String },
+    visaRefusalDetail: { type: String },
+    // Documents
+    hasPassport: { type: Boolean },
+    passportNumber: { type: String },
+    passportExpiry: { type: String },
+    idDocument: { type: [String], default: [] },
+    hasCertificates: { type: Boolean },
+    certificatesDetails: { type: [String], default: [] },
+    qualificationCertificates: { type: [String], default: [] },
+    cvResume: { type: [String], default: [] },
+    hasProofOfAddress: { type: Boolean },
+    proofOfAddressType: { type: String },
+    proofOfAddressDate: { type: String },
+    proofOfAddress: { type: [String], default: [] },
+    otherDocuments: { type: [String], default: [] },
+    otherDocumentsDescription: { type: String },
+    // Employment
+    isEmployed: { type: String },
+    currentEmployment: {
+        employer: { type: String },
+        jobTitle: { type: String },
+        startDate: { type: String },
+        employmentType: { type: String },
+        responsibilities: { type: String },
+        supervisor: { type: String },
+        contactPermission: { type: String },
     },
-    // Contact Data
-    contactData: {
-        contactNumber: { type: String },
-        email: { type: String },
-        confirmEmail: { type: String },
-        preferredContactMethod: { type: String },
-    },
-    emergencyContactData: {
-        emergencyContactNumber: { type: String },
-        emergencyEmail: { type: String },
-        emergencyFullName: { type: String },
-        emergencyRelationship: { type: String },
-    },
-    // Compliance Data
-    complianceData: {
-        startDateInUK: { type: Date },
-        niNumber: { type: String },
-        status: { type: String },
-        ltrCode: { type: String },
-        disability: { type: String },
-        disabilityDetails: { type: String },
-        benefits: { type: String },
-        criminalConviction: { type: String },
-        convictionDetails: { type: String },
-        studentFinance: { type: String },
-    },
-    // Documents Data
-    documentsData: {
-        hasPassport: { type: Boolean },
-        passportNumber: { type: String },
-        passportExpiry: { type: String },
-        idDocument: { type: [String], default: [] },
-        hasCertificates: { type: Boolean },
-        certificatesDetails: { type: String },
-        qualificationCertificates: { type: [String], default: [] },
-        cvResume: { type: [String], default: [] },
-        hasProofOfAddress: { type: Boolean },
-        proofOfAddressType: { type: String },
-        proofOfAddressDate: { type: String },
-        proofOfAddress: { type: [String], default: [] },
-        otherDocuments: { type: [String], default: [] },
-        otherDocumentsDescription: { type: String },
-    },
-    // Employment Data
-    employmentData: {
-        isEmployed: { type: String },
-        currentEmployment: {
+    hasPreviousEmployment: { type: String },
+    previousEmployments: [
+        {
             employer: { type: String },
             jobTitle: { type: String },
             startDate: { type: String },
-            employmentType: { type: String },
+            endDate: { type: String },
+            reasonForLeaving: { type: String },
             responsibilities: { type: String },
-            supervisor: { type: String },
             contactPermission: { type: String },
         },
-        previousEmployments: [
+    ],
+    hasEmploymentGaps: { type: String },
+    employmentGapsExplanation: { type: String },
+    declaration: { type: Boolean, default: false },
+    // Terms
+    acceptTerms: { type: Boolean, default: false },
+    acceptDataProcessing: { type: Boolean, default: false },
+    // Education
+    educationData: {
+        type: [
             {
-                employer: { type: String },
-                jobTitle: { type: String },
-                startDate: { type: String },
-                endDate: { type: String },
-                reasonForLeaving: { type: String },
-                responsibilities: { type: String },
-                contactPermission: { type: String },
+                institution: { type: String },
+                qualification: { type: String },
+                awardDate: { type: Date },
+                grade: { type: String },
+                certificate: { type: String }
             },
         ],
-        hasEmploymentGaps: { type: String },
-        employmentGapsExplanation: { type: String },
-        declaration: { type: Boolean, default: false },
+        default: [],
     },
-    // Terms Data
-    termsData: {
-        acceptTerms: { type: Boolean, default: false },
-        acceptDataProcessing: { type: Boolean, default: false },
+    // Application Data
+    availableFromDate: { type: Date },
+    source: { type: String },
+    // Weekly Availability
+    availability: {
+        type: Map,
+        of: Boolean,
     },
-    educationData: {
-        type: [{
-                institution: { type: String, required: true },
-                studyType: { type: String, required: true },
-                qualification: { type: String, required: true },
-                awardDate: { type: Date, required: true },
-                certificate: { type: String, optional: true },
-                transcript: { type: String, optional: true }
-            }],
-        default: []
+    // Student and Pension Age
+    isStudent: { type: Boolean },
+    isUnderStatePensionAge: { type: Boolean },
+    // Referral Info
+    referralEmployee: { type: String },
+    // Career Section Flags
+    declarationCorrectUpload: { type: Boolean },
+    declarationContactReferee: { type: Boolean },
+    appliedBefore: { type: Boolean },
+    criminalConvictionDetails: { type: String },
+    // Disability and Adjustment Info
+    disability: { type: String },
+    disabilityDetails: { type: String },
+    hasDisability: { type: Boolean },
+    needsReasonableAdjustment: { type: Boolean },
+    reasonableAdjustmentDetails: { type: String },
+    dataProcessingAccepted: { type: Boolean },
+    termsAccepted: { type: Boolean },
+    referee1: {
+        name: { type: String },
+        organisation: { type: String },
+        address: { type: String },
+        relationship: { type: String },
+        otherRelationship: { type: String },
+        email: { type: String },
+        phone: { type: String },
     },
-    // Course Details
-    courseDetailsData: {
+    referee2: {
+        name: { type: String },
+        organisation: { type: String },
+        address: { type: String },
+        relationship: { type: String },
+        otherRelationship: { type: String },
+        email: { type: String },
+        phone: { type: String },
+    },
+    documents: {
+        type: [
+            {
+                type: { type: String },
+                fileUrl: { type: String },
+                customTitle: { type: String },
+            },
+        ],
+        default: [],
+    },
+    englishQualification: {
         type: {
-            course: { type: String, required: true },
-            intake: { type: String, required: true },
+            englishTestType: { type: String },
+            englishTestScore: { type: String },
+            englishTestDate: { type: Date },
+            englishCertificate: { type: String },
         },
     },
+    // declarationCorrectUpload: { type: Boolean },
+    // declarationContactReferee: { type: Boolean },
+    // criminalConviction: { type: Boolean },
+    // criminalConvictionDetails: { type: String },
+    // appliedBefore: { type: Boolean },
 }, {
     timestamps: true,
 });
@@ -256,14 +320,14 @@ userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = this; // doc
         if (user.isModified("password")) {
-            user.password = yield bcrypt_1.default.hash(user.password, Number(config_1.default.bcrypt_salt_rounds));
+            user === null || user === void 0 ? void 0 : user.password = yield bcrypt_1.default.hash(user === null || user === void 0 ? void 0 : user.password, Number(config_1.default.bcrypt_salt_rounds));
         }
         next();
     });
 });
 // set '' after saving password
 userSchema.post("save", function (doc, next) {
-    doc.password = "";
+    doc === null || doc === void 0 ? void 0 : doc.password = "";
     next();
 });
 userSchema.statics.isUserExists = function (email) {

@@ -8,37 +8,31 @@ import { application } from "express";
 import mongoose from "mongoose";
 import { sendEmail } from "../../utils/sendEmail";
 
-
-
-
 const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
   const { searchTerm, ...otherQueryParams } = query;
 
   const processedQuery: Record<string, any> = { ...otherQueryParams };
 
-  
   // 🔍 Handle global search using searchTerm
-  if (searchTerm && typeof searchTerm === 'string') {
-    const searchRegex = new RegExp(searchTerm.trim(), 'i');
+  if (searchTerm && typeof searchTerm === "string") {
+    const searchRegex = new RegExp(searchTerm.trim(), "i");
 
     JobApplicationSearchableFields.forEach((field) => {
       processedQuery[`$expr`] = processedQuery[`$expr`] || {};
-      processedQuery[`$expr`][`$regexMatch`] = processedQuery[`$expr`][`$regexMatch`] || {};
-      
+      processedQuery[`$expr`][`$regexMatch`] =
+        processedQuery[`$expr`][`$regexMatch`] || {};
+
       // Push each field into an OR-like structure using $or array
       processedQuery[`$expr`][`$regexMatch`]["input"] = `$${field}`;
       processedQuery[`$expr`][`$regexMatch`]["regex"] = searchRegex;
     });
   }
 
-
   const ApplicationQuery = new QueryBuilder(
-    JobApplication.find()
-      .populate("jobId")
-      .populate({
-        path: "applicantId",
-        select: "title firstName initial lastName email phone",
-      }),
+    JobApplication.find().populate("jobId").populate({
+      path: "applicantId",
+      select: "title firstName initial lastName email phone",
+    }),
     processedQuery
   )
     .filter()
@@ -54,8 +48,6 @@ const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
     result,
   };
 };
-
-
 
 const getSingleJobApplicationFromDB = async (id: string) => {
   const result = await JobApplication.findById(id).populate("jobId");
@@ -85,19 +77,19 @@ const createJobApplicationIntoDB = async (
   const result = await JobApplication.create(payload);
 
   const populatedResult = await JobApplication.findById(result._id)
-    .populate<{ jobTitle: string }>("jobId", "jobTitle") 
-    .populate<{ name: string; email: string }>("applicantId", "name email"); 
+    .populate<{ jobTitle: string }>("jobId", "jobTitle")
+    .populate<{ name: string; email: string }>("applicantId", "name email");
 
   if (!populatedResult) {
     throw new Error("Failed to populate job application");
   }
 
-  const title = populatedResult.jobId.jobTitle;
-  const applicantName = populatedResult.applicantId.name;
-  const applicantEmail = populatedResult.applicantId.email;
+  const title = populatedResult?.jobId?.jobTitle;
+  const applicantName = populatedResult?.applicantId?.name;
+  const applicantEmail = populatedResult?.applicantId?.email;
 
   const emailSubject = `New Application for ${title}`;
-const otp= ''
+  const otp = "";
   await sendEmail(
     applicantEmail,
     "job-application",

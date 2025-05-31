@@ -3,7 +3,6 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import { AuthServices } from "./auth.service";
 import { sendEmail } from "../../utils/sendEmail";
-import { PasswordResetServices } from "../passwordReset/passwordReset.service";
 import config from "../../config";
 
 

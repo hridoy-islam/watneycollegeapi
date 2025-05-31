@@ -15,48 +15,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const ejs_1 = __importDefault(require("ejs"));
-const sendEmail = (to, template, subject, username, otp) => __awaiter(void 0, void 0, void 0, function* () {
+const sendEmail = (to, template, subject, name, otp, title) => __awaiter(void 0, void 0, void 0, function* () {
     const transporter = nodemailer_1.default.createTransport({
-        host: "smtp-relay.gmail.com",
-        port: 587,
-        secure: false,
+        // host: "smtp.ionos.co.uk",
+        // port: 587,
+        // secure: false,
+        service: "Gmail",
         auth: {
-            // TODO: replace `user` and `pass` values from <https://forwardemail.net>
-            user: "noreply@taskplanner.co.uk",
-            pass: "ddgc rryi lucp ckwx",
-        },
-        tls: {
-            rejectUnauthorized: false,
+            user: "mahitasnimulhasan20@gmail.com",
+            pass: "zgyo izhr jrkh twgp",
         },
     });
-    ejs_1.default.renderFile(__dirname + "/../static/email_template/" + template + ".ejs", {
-        name: username,
-        next_action: "https://taskplanner.co.uk/login",
-        support_url: "https://taskplanner.co.uk",
-        action_url: "https://taskplanner.co.uk/login",
-        login_url: "https://taskplanner.co.uk/login",
-        username,
-        otp,
-    }, function (err, data) {
-        if (err) {
-            console.log(err);
-        }
-        else {
-            var mainOptions = {
-                from: "noreply@taskplanner.co.uk",
-                to,
-                subject,
-                html: data,
-            };
-            transporter.sendMail(mainOptions, function (err, info) {
-                if (err) {
-                    console.log(err);
-                }
-                else {
-                    console.log("Message sent: " + info.response);
-                }
-            });
-        }
-    });
+    try {
+        const html = yield ejs_1.default.renderFile(__dirname + "/../static/email_template/" + template + ".ejs", {
+            otp: otp,
+            name: name,
+            title: title,
+        });
+        const mailOptions = {
+            from: "mahitasnimulhasan20@gmail.com",
+            to,
+            subject,
+            html: html,
+        };
+        const info = yield transporter.sendMail(mailOptions);
+        return info;
+    }
+    catch (error) {
+        console.error("Error sending email:", error);
+        throw error;
+    }
 });
 exports.sendEmail = sendEmail;

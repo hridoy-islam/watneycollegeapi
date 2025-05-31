@@ -5,7 +5,11 @@ const user_route_1 = require("../modules/user/user.route");
 const auth_router_1 = require("../modules/auth/auth.router");
 const notification_route_1 = require("../modules/notification/notification.route");
 const documents_route_1 = require("../modules/documents/documents.route");
-const application_route_1 = require("../modules/applications/application.route");
+const jobApplication_route_1 = require("../modules/jobApplications/jobApplication.route");
+const term_route_1 = require("../modules/term/term.route");
+const course_route_1 = require("../modules/course/course.route");
+const applicationCourse_route_1 = require("../modules/applicationCourse/applicationCourse.route");
+const job_route_1 = require("../modules/job/job.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -25,8 +29,24 @@ const moduleRoutes = [
         route: documents_route_1.UploadDocumentRoutes,
     },
     {
-        path: "/applications",
-        route: application_route_1.ApplicationRoutes,
+        path: "/application-job",
+        route: jobApplication_route_1.JobApplicationRoutes,
+    },
+    {
+        path: "/terms",
+        route: term_route_1.TermRoutes,
+    },
+    {
+        path: "/courses",
+        route: course_route_1.CourseRoutes,
+    },
+    {
+        path: "/application-course",
+        route: applicationCourse_route_1.ApplicationCourseRoutes,
+    },
+    {
+        path: "/jobs",
+        route: job_route_1.JobRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

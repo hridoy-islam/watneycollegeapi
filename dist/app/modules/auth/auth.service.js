@@ -41,6 +41,7 @@ const AppError_1 = __importDefault(require("../../errors/AppError"));
 const user_model_1 = require("../user/user.model");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth_utils_1 = require("./auth.utils");
+const sendEmail_1 = require("../../utils/sendEmail");
 const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
 const UAParser = __importStar(require("ua-parser-js"));
@@ -118,24 +119,19 @@ const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function*
             role: foundUser === null || foundUser === void 0 ? void 0 : foundUser.role,
             authorized: foundUser === null || foundUser === void 0 ? void 0 : foundUser.authorized,
             isValided: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isValided,
+            isCompleted: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isCompleted
         };
         // If user is not authorized, generate OTP and send it
-        // if (!foundUser.isValided) {
-        //   const { otp, otpExpiry } = generateOtpAndExpiry();
-        //   await User.findByIdAndUpdate(foundUser._id, {
-        //     otp,
-        //     otpExpiry,
-        //     isUsed: false,
-        //   });
-        //   const emailSubject = "Validate Your Profile with OTP";
-        //   await sendEmail(
-        //     foundUser.email,
-        //     "reset_password_template",
-        //     emailSubject,
-        //     foundUser.name,
-        //     otp
-        //   );
-        // }
+        if (!foundUser.isValided) {
+            const { otp, otpExpiry } = generateOtpAndExpiry();
+            yield user_model_1.User.findByIdAndUpdate(foundUser._id, {
+                otp,
+                otpExpiry,
+                isUsed: false,
+            });
+            const emailSubject = "Validate Your Profile with OTP";
+            yield (0, sendEmail_1.sendEmail)(foundUser.email, "verify_email", emailSubject, foundUser.name, otp);
+        }
         // Generate access and refresh tokens
         const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
         const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in);
@@ -165,6 +161,9 @@ const refreshToken = (token) => __awaiter(void 0, void 0, void 0, function* () {
             email: foundUser.email,
             name: foundUser.name,
             role: foundUser.role,
+            authorized: foundUser === null || foundUser === void 0 ? void 0 : foundUser.authorized,
+            isValided: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isValided,
+            isCompleted: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isCompleted
         };
         // Generate new access token
         const newAccessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
@@ -231,7 +230,7 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
     if (user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This user is already exits!");
     }
-    // const { otp, otpExpiry } = generateOtpAndExpiry();
+    const { otp, otpExpiry } = generateOtpAndExpiry();
     const newUserPayload = Object.assign({}, payload);
     const result = yield user_model_1.User.create(newUserPayload);
     try {
@@ -256,19 +255,18 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
     return result;
 });
 const EmailSendOTP = (email) => __awaiter(void 0, void 0, void 0, function* () {
-    const user = yield user_model_1.User.isUserExists(email);
-    if (!user) {
+    const foundUser = yield user_model_1.User.isUserExists(email);
+    if (!foundUser) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "No User Found");
     }
     const { otp, otpExpiry } = generateOtpAndExpiry();
-    const emailSubject = "Validate Your Profile with OTP";
-    // await sendEmail(
-    //   user.email,
-    //   "reset_password_template",
-    //   emailSubject,
-    //   user.name,
-    //   otp
-    // );
+    yield user_model_1.User.findByIdAndUpdate(foundUser._id, {
+        otp,
+        otpExpiry,
+        isUsed: false,
+    });
+    const emailSubject = "Your Password Reset OTP";
+    yield (0, sendEmail_1.sendEmail)(email, "reset_password_template", emailSubject, foundUser.name, otp);
     yield user_model_1.User.updateOne({ email }, { otp, otpExpiry });
 });
 const verifyEmailIntoDB = (email, otp) => __awaiter(void 0, void 0, void 0, function* () {
@@ -282,7 +280,7 @@ const verifyEmailIntoDB = (email, otp) => __awaiter(void 0, void 0, void 0, func
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Invalid OTP!");
     }
     // Check OTP expiry using moment
-    if (foundUser.otpExpires && (0, moment_1.default)().isAfter((0, moment_1.default)(foundUser.otpExpires))) {
+    if (foundUser.otpExpiry && (0, moment_1.default)().isAfter((0, moment_1.default)(foundUser.otpExpiry))) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "OTP has expired");
     }
     // Update user: mark as authorized and clear OTP
@@ -362,19 +360,12 @@ const requestOtp = (email) => __awaiter(void 0, void 0, void 0, function* () {
         isUsed: false,
     });
     const emailSubject = "Your Password Reset OTP";
-    // await sendEmail(
-    //   email,
-    //   "reset_password_template",
-    //   emailSubject,
-    //   foundUser.name,
-    //   otp
-    // );
+    yield (0, sendEmail_1.sendEmail)(email, "reset_password_template", emailSubject, foundUser.name, otp);
 });
 const validateOtp = (email, otp) => __awaiter(void 0, void 0, void 0, function* () {
     // Check if the user exists
     const foundUser = yield user_model_1.User.isUserExists(email);
     if (!foundUser) {
-        console.log("User not found for email:", email);
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Email not found");
     }
     // Check if the OTP is linked to a valid reset request and is not already used

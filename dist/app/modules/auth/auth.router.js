@@ -10,7 +10,9 @@ const validateRequest_1 = __importDefault(require("../../middlewares/validateReq
 const auth_validation_1 = require("./auth.validation");
 const router = express_1.default.Router();
 router.post("/login", (0, validateRequest_1.default)(auth_validation_1.AuthValidations.loginValidationSchema), authController_1.AuthControllers.login);
-router.post('/refreshToken', (0, validateRequest_1.default)(auth_validation_1.AuthValidations.refreshTokenZodSchema), authController_1.AuthControllers.refreshToken);
+router.post('/refreshToken', 
+// validateRequest(AuthValidations.refreshTokenZodSchema),
+authController_1.AuthControllers.refreshToken);
 router.post("/google", (0, validateRequest_1.default)(auth_validation_1.AuthValidations.googleValidationSchema), authController_1.AuthControllers.googleLoginController);
 router.post("/signup", (0, validateRequest_1.default)(auth_validation_1.AuthValidations.createUserValidationSchema), authController_1.AuthControllers.createUser);
 // router.post(

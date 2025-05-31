@@ -37,7 +37,6 @@ const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
     return result;
 });
 const updateUserIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log(payload);
     const user = yield user_model_1.User.findById(id);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");

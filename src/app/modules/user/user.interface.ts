@@ -185,7 +185,7 @@ export interface TUser {
   firstName?: string;
   lastName?: string;
   otherName?: string;
-  initial:string;
+  initial: string;
   gender?: string;
   dateOfBirth?: Date;
   nationality?: string;
@@ -195,7 +195,12 @@ export interface TUser {
   maritalStatus?: string;
   studentType?: string;
   requireVisa?: string;
-  countryOfDomicile?:string;
+  countryOfDomicile?: string;
+  isBritishCitizen?: string;
+  shareCode?: string;
+  nationalInsuranceNumber: string;
+  countryOfResidence: string;
+  
 
   // Address Data (flattened)
   residentialAddressLine1?: string;
@@ -285,6 +290,7 @@ export interface TUser {
   // Application Data
   availableFromDate?: Date;
   source?: string;
+  applicationLocation?: string;
 
   // Weekly Availability
   availability?: {

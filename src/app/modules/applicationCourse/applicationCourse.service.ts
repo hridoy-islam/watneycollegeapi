@@ -59,9 +59,9 @@ const createApplicationCourseIntoDB = async (
     throw new Error("Failed to populate course application");
   }
 
-  const title = populatedResult.courseId.name;
-  const applicantName = populatedResult.studentId.name;
-  const applicantEmail = populatedResult.studentId.email;
+  const title = populatedResult?.courseId?.name;
+  const applicantName = populatedResult?.studentId?.name;
+  const applicantEmail = populatedResult?.studentId?.email;
 
   const emailSubject = `Thank You for Applying to ${title}`;
   const otp = ""; 

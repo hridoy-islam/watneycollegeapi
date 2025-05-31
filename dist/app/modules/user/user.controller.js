@@ -46,30 +46,8 @@ const updateUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, voi
         data: result,
     });
 }));
-const getCompanyUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.params;
-    const result = yield user_service_1.UserServices.getAllUserByCompany(userId);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: "All Users Fetched Successfully",
-        data: result,
-    });
-}));
-const assignUser = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { id } = req.params;
-    const result = yield user_service_1.UserServices.assignUserToDB(id, req.body);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: "Colleagues Updated Successfully",
-        data: result,
-    });
-}));
 exports.UserControllers = {
     getAllUser,
     getSingleUser,
     updateUser,
-    getCompanyUser,
-    assignUser
 };
