@@ -27,20 +27,15 @@ function generateOtpAndExpiry() {
 
 const checkLogin = async (payload: TLogin, req: any) => {
   try {
-    // Ensure req is available
-    if (!req) {
-      throw new AppError(httpStatus.BAD_REQUEST, "Request object is missing");
-    }
-
     const foundUser = await User.isUserExists(payload.email);
     if (!foundUser) {
-      throw new AppError(httpStatus.NOT_FOUND, "Login details are incorrect");
+      throw new AppError(httpStatus.NOT_FOUND, "Login Details are not correct");
     }
 
     if (foundUser.isDeleted) {
       throw new AppError(
         httpStatus.NOT_FOUND,
-        "This account has been deleted."
+        "This Account Has Been Deleted."
       );
     }
 
@@ -50,6 +45,7 @@ const checkLogin = async (payload: TLogin, req: any) => {
       throw new AppError(httpStatus.FORBIDDEN, "Password does not match");
     }
 
+    
     // Get the client's IP address
     const ipAddress = requestIp.getClientIp(req);
     if (!ipAddress) {
@@ -61,7 +57,7 @@ const checkLogin = async (payload: TLogin, req: any) => {
     }
 
     // Parse user agent
-    const parser = new UAParser.UAParser(req.headers['user-agent']);
+    const parser = new UAParser.UAParser(req.headers["user-agent"]);
     const uaResult = parser.getResult();
 
     // Create device fingerprint
@@ -74,42 +70,34 @@ const checkLogin = async (payload: TLogin, req: any) => {
     const userAgentInfo = {
       browser: {
         name: uaResult.browser.name,
-        version: uaResult.browser.version
+        version: uaResult.browser.version,
       },
       os: {
         name: uaResult.os.name,
-        version: uaResult.os.version
+        version: uaResult.os.version,
       },
       device: {
-        model: uaResult.device?.model || 'Desktop',
-        type: uaResult.device?.type || 'desktop',
-        vendor: uaResult.device?.vendor ||'unknown'
+        model: uaResult.device?.model || "Desktop",
+        type: uaResult.device?.type || "desktop",
+        vendor: uaResult.device?.vendor || "unknown",
       },
       cpu: {
-        architecture: uaResult.cpu.architecture
+        architecture: uaResult.cpu.architecture,
       },
       ipAddress: ipAddress,
       macAddress: deviceFingerprint,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     // Update user with new login info
     await User.findByIdAndUpdate(foundUser._id, {
       $push: {
-        userAgentInfo: userAgentInfo
-      }
+        userAgentInfo: userAgentInfo,
+      },
     });
 
     // Prepare JWT payload
-    const jwtPayload = {
-      _id: foundUser._id?.toString(),
-      email: foundUser?.email,
-      name: foundUser?.name,
-      role: foundUser?.role,
-      authorized: foundUser?.authorized,
-      isValided: foundUser?.isValided,
-      isCompleted: foundUser?.isCompleted
-    };
+
 
     // If user is not authorized, generate OTP and send it
     if (!foundUser.isValided) {
@@ -131,6 +119,16 @@ const checkLogin = async (payload: TLogin, req: any) => {
       );
     }
 
+    const jwtPayload = {
+      _id: foundUser._id?.toString(),
+      email: foundUser?.email,
+      name: foundUser?.name,
+      role: foundUser?.role,
+      authorized: foundUser?.authorized,
+      isValided: foundUser?.isValided,
+      isCompleted: foundUser?.isCompleted,
+    };
+    
     // Generate access and refresh tokens
     const accessToken = createToken(
       jwtPayload,

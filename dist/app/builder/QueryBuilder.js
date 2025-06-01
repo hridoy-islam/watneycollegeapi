@@ -14,19 +14,43 @@ class QueryBuilder {
         this.modelQuery = modelQuery;
         this.query = query;
     }
+    // search(searchableFields: string[]) {
+    //   const searchTerm = this?.query?.searchTerm;
+    //   if (searchTerm) {
+    //     this.modelQuery = this.modelQuery.find({
+    //       $or: searchableFields.map(
+    //         (field) =>
+    //           ({
+    //             [field]: { $regex: searchTerm, $options: "i" },
+    //           }) as FilterQuery<T>
+    //       ),
+    //     });
+    //   }
+    //   return this;
+    // }
     search(searchableFields) {
         var _a;
         const searchTerm = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.searchTerm;
         if (searchTerm) {
-            this.modelQuery = this.modelQuery.find({
+            const searchTerms = searchTerm
+                .split(" ")
+                .filter((term) => term.trim() !== ""); // Split into individual terms
+            // Create an array of conditions for each term
+            const searchConditions = searchTerms.map((term) => ({
                 $or: searchableFields.map((field) => ({
-                    [field]: { $regex: searchTerm, $options: "i" },
+                    [field]: { $regex: term, $options: "i" }, // Case-insensitive regex for each field
                 })),
-            });
+            }));
+            // Combine all conditions with $and to ensure all terms are matched
+            if (searchConditions.length > 0) {
+                this.modelQuery = this.modelQuery.find({
+                    $and: searchConditions,
+                });
+            }
         }
         return this;
     }
-    filter() {
+    filter(filters) {
         const queryObj = Object.assign({}, this.query); // copy
         // Filtering
         const excludeFields = ["searchTerm", "sort", "limit", "page", "fields"];
@@ -42,10 +66,17 @@ class QueryBuilder {
     }
     paginate() {
         var _a, _b;
-        const page = Number((_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.page) || 1;
-        const limit = Number((_b = this === null || this === void 0 ? void 0 : this.query) === null || _b === void 0 ? void 0 : _b.limit) || 10;
-        const skip = (page - 1) * limit;
-        this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+        const limitParam = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.limit;
+        const page = Number((_b = this === null || this === void 0 ? void 0 : this.query) === null || _b === void 0 ? void 0 : _b.page) || 1;
+        if (limitParam === "all") {
+            // Return all records: no limit, no skip
+            this.modelQuery = this.modelQuery.skip(0); // Optional: skip(0) for consistency
+        }
+        else {
+            const limit = Number(limitParam) || 10;
+            const skip = (page - 1) * limit;
+            this.modelQuery = this.modelQuery.skip(skip).limit(limit);
+        }
         return this;
     }
     fields() {
@@ -57,10 +88,12 @@ class QueryBuilder {
     countTotal() {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            const limitParam = (_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.limit;
             const totalQueries = this.modelQuery.getFilter();
             const total = yield this.modelQuery.model.countDocuments(totalQueries);
-            const page = Number((_a = this === null || this === void 0 ? void 0 : this.query) === null || _a === void 0 ? void 0 : _a.page) || 1;
-            const limit = Number((_b = this === null || this === void 0 ? void 0 : this.query) === null || _b === void 0 ? void 0 : _b.limit) || 10;
+            const page = Number((_b = this === null || this === void 0 ? void 0 : this.query) === null || _b === void 0 ? void 0 : _b.page) || 1;
+            // const limit = Number(this?.query?.limit) || 10;
+            const limit = limitParam === "all" ? total : Number(limitParam) || 10;
             const totalPage = Math.ceil(total / limit);
             return {
                 page,

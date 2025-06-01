@@ -55,16 +55,12 @@ function generateOtpAndExpiry() {
 const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d;
     try {
-        // Ensure req is available
-        if (!req) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Request object is missing");
-        }
         const foundUser = yield user_model_1.User.isUserExists(payload.email);
         if (!foundUser) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Login details are incorrect");
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, "Login Details are not correct");
         }
         if (foundUser.isDeleted) {
-            throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This account has been deleted.");
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, "This Account Has Been Deleted.");
         }
         if (!(yield user_model_1.User.isPasswordMatched(payload === null || payload === void 0 ? void 0 : payload.password, foundUser === null || foundUser === void 0 ? void 0 : foundUser.password))) {
             throw new AppError_1.default(http_status_1.default.FORBIDDEN, "Password does not match");
@@ -76,7 +72,7 @@ const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function*
             throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, "IP address retrieval failed");
         }
         // Parse user agent
-        const parser = new UAParser.UAParser(req.headers['user-agent']);
+        const parser = new UAParser.UAParser(req.headers["user-agent"]);
         const uaResult = parser.getResult();
         // Create device fingerprint
         const deviceFingerprint = crypto_1.default
@@ -87,40 +83,31 @@ const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function*
         const userAgentInfo = {
             browser: {
                 name: uaResult.browser.name,
-                version: uaResult.browser.version
+                version: uaResult.browser.version,
             },
             os: {
                 name: uaResult.os.name,
-                version: uaResult.os.version
+                version: uaResult.os.version,
             },
             device: {
-                model: ((_a = uaResult.device) === null || _a === void 0 ? void 0 : _a.model) || 'Desktop',
-                type: ((_b = uaResult.device) === null || _b === void 0 ? void 0 : _b.type) || 'desktop',
-                vendor: ((_c = uaResult.device) === null || _c === void 0 ? void 0 : _c.vendor) || 'unknown'
+                model: ((_a = uaResult.device) === null || _a === void 0 ? void 0 : _a.model) || "Desktop",
+                type: ((_b = uaResult.device) === null || _b === void 0 ? void 0 : _b.type) || "desktop",
+                vendor: ((_c = uaResult.device) === null || _c === void 0 ? void 0 : _c.vendor) || "unknown",
             },
             cpu: {
-                architecture: uaResult.cpu.architecture
+                architecture: uaResult.cpu.architecture,
             },
             ipAddress: ipAddress,
             macAddress: deviceFingerprint,
-            timestamp: new Date()
+            timestamp: new Date(),
         };
         // Update user with new login info
         yield user_model_1.User.findByIdAndUpdate(foundUser._id, {
             $push: {
-                userAgentInfo: userAgentInfo
-            }
+                userAgentInfo: userAgentInfo,
+            },
         });
         // Prepare JWT payload
-        const jwtPayload = {
-            _id: (_d = foundUser._id) === null || _d === void 0 ? void 0 : _d.toString(),
-            email: foundUser === null || foundUser === void 0 ? void 0 : foundUser.email,
-            name: foundUser === null || foundUser === void 0 ? void 0 : foundUser.name,
-            role: foundUser === null || foundUser === void 0 ? void 0 : foundUser.role,
-            authorized: foundUser === null || foundUser === void 0 ? void 0 : foundUser.authorized,
-            isValided: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isValided,
-            isCompleted: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isCompleted
-        };
         // If user is not authorized, generate OTP and send it
         if (!foundUser.isValided) {
             const { otp, otpExpiry } = generateOtpAndExpiry();
@@ -132,6 +119,15 @@ const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function*
             const emailSubject = "Validate Your Profile with OTP";
             yield (0, sendEmail_1.sendEmail)(foundUser.email, "verify_email", emailSubject, foundUser.name, otp);
         }
+        const jwtPayload = {
+            _id: (_d = foundUser._id) === null || _d === void 0 ? void 0 : _d.toString(),
+            email: foundUser === null || foundUser === void 0 ? void 0 : foundUser.email,
+            name: foundUser === null || foundUser === void 0 ? void 0 : foundUser.name,
+            role: foundUser === null || foundUser === void 0 ? void 0 : foundUser.role,
+            authorized: foundUser === null || foundUser === void 0 ? void 0 : foundUser.authorized,
+            isValided: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isValided,
+            isCompleted: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isCompleted,
+        };
         // Generate access and refresh tokens
         const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
         const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in);
