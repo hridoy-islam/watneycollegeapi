@@ -160,7 +160,7 @@ const userSchema = new Schema<TUser, UserModel>(
     niNumber: { type: String },
     immigrationStatus: { type: String },
     ltrCode: { type: String },
-    
+
     benefits: { type: String },
     criminalConviction: { type: Boolean },
     convictionDetails: { type: String },
@@ -227,7 +227,7 @@ const userSchema = new Schema<TUser, UserModel>(
           qualification: { type: String },
           awardDate: { type: Date },
           grade: { type: String },
-          certificate:{type: String}
+          certificate: { type: String },
         },
       ],
       default: [],
@@ -303,6 +303,11 @@ const userSchema = new Schema<TUser, UserModel>(
         englishCertificate: { type: String },
       },
     },
+
+    //fundingInformation:
+
+    fundingType: { type: String },
+    grantDetails:{type: String},
 
     // declarationCorrectUpload: { type: Boolean },
     // declarationContactReferee: { type: Boolean },

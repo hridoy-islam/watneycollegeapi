@@ -49,6 +49,31 @@ const updateApplicationCourseIntoDB = async (id: string, payload: Partial<TAppli
 const createApplicationCourseIntoDB = async (
   payload: Partial<TApplicationCourse>
 ) => {
+
+  const { courseId, intakeId, studentId } = payload;
+
+  // Ensure all required fields are provided
+  if (!courseId || !intakeId || !studentId) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "Missing required fields: courseId, intakeId, and studentId are all required"
+    );
+  }
+
+  // Check if an application already exists with the same course, student, and intake
+  const existingApplication = await ApplicationCourse.findOne({
+    courseId,
+    intakeId,
+    studentId,
+  });
+
+  if (existingApplication) {
+    throw new AppError(
+      httpStatus.BAD_REQUEST,
+      "You have already applied for this course with the selected intake."
+    );
+  }
+
   const result = await ApplicationCourse.create(payload);
 
   const populatedResult = await ApplicationCourse.findById(result._id)
@@ -68,7 +93,7 @@ const createApplicationCourseIntoDB = async (
 
   await sendEmail(
     applicantEmail,
-    "course-register", // make sure this template exists
+    "course-register", 
     emailSubject,
     applicantName,
     otp,
