@@ -284,17 +284,6 @@ const userSchema = new Schema<TUser, UserModel>(
       phone: { type: String },
     },
 
-    documents: {
-      type: [
-        {
-          type: { type: String }, // Replace with DocumentType if it's an enum
-          fileUrl: { type: String },
-          customTitle: { type: String },
-        },
-      ],
-      default: [],
-    },
-
     englishQualification: {
       type: {
         englishTestType: { type: String },
@@ -307,13 +296,14 @@ const userSchema = new Schema<TUser, UserModel>(
     //fundingInformation:
 
     fundingType: { type: String },
-    grantDetails:{type: String},
+    grantDetails: { type: String },
 
-    // declarationCorrectUpload: { type: Boolean },
-    // declarationContactReferee: { type: Boolean },
-    // criminalConviction: { type: Boolean },
-    // criminalConvictionDetails: { type: String },
-    // appliedBefore: { type: Boolean },
+    //student documents
+
+    cv: { type: [String], default: [] },
+    coverLetter: { type: [String], default: [] },
+    rightToWork: { type: [String], default: [] },
+    signature: { type: String},
   },
   {
     timestamps: true,
