@@ -127,6 +127,7 @@ const checkLogin = async (payload: TLogin, req: any) => {
       authorized: foundUser?.authorized,
       isValided: foundUser?.isValided,
       isCompleted: foundUser?.isCompleted,
+      studentType: foundUser?.studentType
     };
     
     // Generate access and refresh tokens
@@ -179,7 +180,8 @@ const refreshToken = async (token: string) => {
       role: foundUser.role,
       authorized: foundUser?.authorized,
       isValided: foundUser?.isValided,
-      isCompleted: foundUser?.isCompleted
+      isCompleted: foundUser?.isCompleted,
+      studentType: foundUser?.studentType,
     };
 
     // Generate new access token

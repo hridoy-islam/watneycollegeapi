@@ -170,6 +170,7 @@ const userSchema = new Schema<TUser, UserModel>(
     completedUKCourse: { type: String },
     visaRefusal: { type: String },
     visaRefusalDetail: { type: String },
+    hearAboutUs:{type: String},
 
     // Documents
     hasPassport: { type: Boolean },
@@ -183,7 +184,6 @@ const userSchema = new Schema<TUser, UserModel>(
     hasProofOfAddress: { type: Boolean },
     proofOfAddressType: { type: String },
     proofOfAddressDate: { type: String },
-    proofOfAddress: { type: [String], default: [] },
     otherDocuments: { type: [String], default: [] },
     otherDocumentsDescription: { type: String },
 
@@ -297,13 +297,20 @@ const userSchema = new Schema<TUser, UserModel>(
 
     fundingType: { type: String },
     grantDetails: { type: String },
+    fundingCompanyName: { type: String },
+    fundingContactPerson: { type: String },
+    fundingEmail: { type: String },
+    fundingPhoneNumber: { type: String },
 
     //student documents
 
-    cv: { type: [String], default: [] },
-    coverLetter: { type: [String], default: [] },
-    rightToWork: { type: [String], default: [] },
-    signature: { type: String},
+    passport: { type: [String], default: [] },
+    qualification: { type: [String], default: [] },
+    workExperience: { type: [String], default: [] },
+    personalStatement: { type: [String], default: [] },
+    bankStatement: { type: [String], default: [] },
+    proofOfAddress: { type: [String], default: [] },
+   
   },
   {
     timestamps: true,

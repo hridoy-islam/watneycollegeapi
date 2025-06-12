@@ -5,5 +5,6 @@ export interface TApplicationCourse {
   courseId: Types.ObjectId;
   intakeId: Types.ObjectId;
   studentId: Types.ObjectId;
-  seen: boolean
+  seen: boolean;
+  status: string;
 }
