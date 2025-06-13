@@ -8,7 +8,7 @@ const storage = new Storage({
   keyFilename: "./work.json",
   projectId: "vast-pride-453709-n7",
 });
-const bucketName = "watneycollage";
+const bucketName = "watney";
 const bucket = storage.bucket(bucketName);
 
 const UploadDocumentToGCS = async (file: any, payload: any) => {
@@ -47,7 +47,7 @@ const UploadDocumentToGCS = async (file: any, payload: any) => {
     const fileUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
 
     // Check file type and determine where to save the file URL
-    if (file_type === "profile") {
+    if (file_type === "userProfile") {
       const user = await User.findById(entityId);
       if (!user) throw new AppError(httpStatus.NOT_FOUND, "User not found");
 
