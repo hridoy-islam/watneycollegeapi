@@ -310,6 +310,7 @@ const userSchema = new Schema<TUser, UserModel>(
     personalStatement: { type: [String], default: [] },
     bankStatement: { type: [String], default: [] },
     proofOfAddress: { type: [String], default: [] },
+    photoId: { type: [String], default: [] },
    
   },
   {
