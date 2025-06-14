@@ -242,7 +242,7 @@ export interface TUser {
   hasCertificates?: boolean;
   certificatesDetails?: string;
   qualificationCertificates?: string[];
-  cvResume?: string[];
+  cvResume?: string;
   hasProofOfAddress?: boolean;
   proofOfAddressType?: string;
   proofOfAddressDate?: string;

@@ -180,7 +180,7 @@ const userSchema = new Schema<TUser, UserModel>(
     hasCertificates: { type: Boolean },
     certificatesDetails: { type: [String], default: [] },
     qualificationCertificates: { type: [String], default: [] },
-    cvResume: { type: [String], default: [] },
+    cvResume: { type: String },
     hasProofOfAddress: { type: Boolean },
     proofOfAddressType: { type: String },
     proofOfAddressDate: { type: String },

@@ -13,20 +13,7 @@ const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
 
   const processedQuery: Record<string, any> = { ...otherQueryParams };
 
-  // 🔍 Handle global search using searchTerm
-  if (searchTerm && typeof searchTerm === "string") {
-    const searchRegex = new RegExp(searchTerm.trim(), "i");
-
-    JobApplicationSearchableFields.forEach((field) => {
-      processedQuery[`$expr`] = processedQuery[`$expr`] || {};
-      processedQuery[`$expr`][`$regexMatch`] =
-        processedQuery[`$expr`][`$regexMatch`] || {};
-
-      // Push each field into an OR-like structure using $or array
-      processedQuery[`$expr`][`$regexMatch`]["input"] = `$${field}`;
-      processedQuery[`$expr`][`$regexMatch`]["regex"] = searchRegex;
-    });
-  }
+ 
 
   const ApplicationQuery = new QueryBuilder(
     JobApplication.find().populate("jobId").populate({
@@ -74,6 +61,23 @@ const updateJobApplicationIntoDB = async (
 const createJobApplicationIntoDB = async (
   payload: Partial<TJobApplication>
 ) => {
+
+  if (!payload.jobId || !payload.applicantId) {
+    throw new Error("Both jobId and applicantId are required");
+  }
+
+  // Check if application already exists for this jobId and applicantId
+  const existingApplication = await JobApplication.findOne({
+    jobId: payload.jobId,
+    applicantId: payload.applicantId
+  });
+
+  if (existingApplication) {
+    throw new Error("You have already applied for this job.");
+  }
+
+
+  
   const result = await JobApplication.create(payload);
 
   const populatedResult = await JobApplication.findById(result._id)

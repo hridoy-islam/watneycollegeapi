@@ -3,6 +3,7 @@ import httpStatus from "http-status";
 import AppError from "../../errors/AppError";
 
 import { User } from "../user/user.model";
+import pdfParse from "pdf-parse";
 
 const storage = new Storage({
   keyFilename: "./work.json",
@@ -45,7 +46,7 @@ const UploadDocumentToGCS = async (file: any, payload: any) => {
     });
 
     const fileUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
-
+    const fileContentText = file.buffer.toString("utf-8");
     // Check file type and determine where to save the file URL
     if (file_type === "userProfile") {
       const user = await User.findById(entityId);
@@ -57,8 +58,13 @@ const UploadDocumentToGCS = async (file: any, payload: any) => {
       return { entityId, file_type, fileUrl };
     } else if (file_type === "studentDoc") {
       return { entityId, file_type, fileUrl };
+    } else if (file_type === "resumeDoc") {
+      const pdfData = await pdfParse(file.buffer);
+      const extractedText = pdfData.text;
+      return { entityId, file_type, fileUrl, fileContent: extractedText };
+    } else if (file_type === "careerDoc") {
+      return { entityId, file_type, fileUrl };
     }
-    
   } catch (error) {
     console.error("File upload failed:", error);
     throw new AppError(httpStatus.INTERNAL_SERVER_ERROR, "File upload failed");
