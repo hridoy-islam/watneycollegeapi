@@ -148,6 +148,20 @@ const userSchema = new Schema<TUser, UserModel>(
     postalPostCode: { type: String },
     postalCountry: { type: String },
 
+    //career previous address
+    prevPostalAddressLine1: { type: String },
+    prevPostalAddressLine2: { type: String },
+    prevPostalCity: { type: String },
+    prevPostalPostCode: { type: String },
+    prevPostalCountry: { type: String },
+    //career applicants
+
+    isOver18: { type: Boolean },
+    isSubjectToImmigrationControl: { type: Boolean },
+    canWorkInUK: { type: Boolean },
+    hasTeamMemberRelationship: { type: Boolean },
+    hasDrivingLicence: { type: Boolean },
+    drivingConvictions: { type: String },
     // Emergency Contact
     emergencyContactNumber: { type: String },
     emergencyEmail: { type: String },
@@ -170,7 +184,7 @@ const userSchema = new Schema<TUser, UserModel>(
     completedUKCourse: { type: String },
     visaRefusal: { type: String },
     visaRefusalDetail: { type: String },
-    hearAboutUs:{type: String},
+    hearAboutUs: { type: String },
 
     // Documents
     hasPassport: { type: Boolean },
@@ -311,7 +325,6 @@ const userSchema = new Schema<TUser, UserModel>(
     bankStatement: { type: [String], default: [] },
     proofOfAddress: { type: [String], default: [] },
     photoId: { type: [String], default: [] },
-   
   },
   {
     timestamps: true,
