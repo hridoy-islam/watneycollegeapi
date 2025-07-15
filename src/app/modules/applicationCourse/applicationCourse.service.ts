@@ -74,7 +74,11 @@ const createApplicationCourseIntoDB = async (
     );
   }
 
+  
   const result = await ApplicationCourse.create(payload);
+if (!result || !result._id) {
+  throw new Error("Course creation failed");
+}
 
   const populatedResult = await ApplicationCourse.findById(result._id)
     .populate<{ courseTitle: string }>("courseId", "name")

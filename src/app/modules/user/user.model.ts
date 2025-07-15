@@ -118,7 +118,6 @@ const userSchema = new Schema<TUser, UserModel>(
     nationality: { type: String },
     ethnicity: { type: String },
     customEthnicity: { type: String },
-    countryOfDomicile: { type: String },
     countryOfBirth: { type: String },
     maritalStatus: { type: String },
     studentType: { type: String },
@@ -315,9 +314,9 @@ const userSchema = new Schema<TUser, UserModel>(
     fundingContactPerson: { type: String },
     fundingEmail: { type: String },
     fundingPhoneNumber: { type: String },
-
+    
+    immigrationDocument: { type: [String], default: [] },
     //student documents
-
     passport: { type: [String], default: [] },
     qualification: { type: [String], default: [] },
     workExperience: { type: [String], default: [] },
