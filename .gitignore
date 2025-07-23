@@ -4,4 +4,5 @@ dist
 .env
 .env local
 work.json
+gmail.json
 /uploads

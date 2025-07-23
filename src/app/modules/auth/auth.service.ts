@@ -325,11 +325,11 @@ const EmailSendOTP = async (email: string) => {
     otpExpiry,
     isUsed: false,
   });
-  const emailSubject = "Your Password Reset OTP";
+  const emailSubject = "Validate Your Profile with OTP";
 
   await sendEmail(
     email,
-    "reset_password_template",
+    "verify_email",
     emailSubject,
     foundUser.name,
     otp
