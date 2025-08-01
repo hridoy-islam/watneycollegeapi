@@ -10,7 +10,15 @@ export const sendEmail = async (
   subject: string,
   name: string,
   otp?: string,
-  title?: string
+  title?: string,
+  email?: string,
+  term?: string,
+  studentType?: string,
+  phone?: string,
+  countryOfResidence?: string,
+  dob?: string,
+  availableFromDate?: string
+
 ) => {
   const oAuth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -44,6 +52,16 @@ export const sendEmail = async (
         otp: otp,
         name: name,
         title: title,
+        email: email,
+        term: term,
+        studentType: studentType,
+        phone: phone,
+        countryOfResidence: countryOfResidence,
+        dob: dob,
+        availableFromDate: availableFromDate,
+      },
+      {
+        async: true,
       }
     );
     const mailOptions = {
