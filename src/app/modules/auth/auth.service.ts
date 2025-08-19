@@ -46,57 +46,8 @@ const checkLogin = async (payload: TLogin, req: any) => {
     }
 
     
-    // Get the client's IP address
-    const ipAddress = requestIp.getClientIp(req);
-    if (!ipAddress) {
-      console.error("Could not retrieve IP address from request.");
-      throw new AppError(
-        httpStatus.INTERNAL_SERVER_ERROR,
-        "IP address retrieval failed"
-      );
-    }
-
-    // Parse user agent
-    const parser = new UAParser.UAParser(req.headers["user-agent"]);
-    const uaResult = parser.getResult();
-
-    // Create device fingerprint
-    const deviceFingerprint = crypto
-      .createHash("sha256")
-      .update(req.headers["user-agent"] + req.headers["accept-language"])
-      .digest("hex");
-
-    // Prepare user agent info object
-    const userAgentInfo = {
-      browser: {
-        name: uaResult.browser.name,
-        version: uaResult.browser.version,
-      },
-      os: {
-        name: uaResult.os.name,
-        version: uaResult.os.version,
-      },
-      device: {
-        model: uaResult.device?.model || "Desktop",
-        type: uaResult.device?.type || "desktop",
-        vendor: uaResult.device?.vendor || "unknown",
-      },
-      cpu: {
-        architecture: uaResult.cpu.architecture,
-      },
-      ipAddress: ipAddress,
-      macAddress: deviceFingerprint,
-      timestamp: new Date(),
-    };
-
-    // Update user with new login info
-    await User.findByIdAndUpdate(foundUser._id, {
-      $push: {
-        userAgentInfo: userAgentInfo,
-      },
-    });
-
-    // Prepare JWT payload
+    
+    
 
 
     // If user is not authorized, generate OTP and send it
@@ -109,7 +60,7 @@ const checkLogin = async (payload: TLogin, req: any) => {
         isUsed: false,
       });
 
-      const emailSubject = "Validate Your Profile with OTP";
+      const emailSubject = "Verify Your Watney College Account";
       await sendEmail(
         foundUser.email,
         "verify_email",
@@ -291,21 +242,12 @@ const createUserIntoDB = async (payload: TCreateUser) => {
   const result = await User.create(newUserPayload);
 
   try {
-    // const emailSubject = 'Your Password Reset OTP';
-    // await sendEmail(
-    //   payload.email,
-    //   'reset_password_template',
-    //   emailSubject,
-    //   payload.name,
-    //   otp
-    // );
-
-    // await sendEmail(
-    //   payload.email,
-    //   "welcome_template",
-    //   "Welcome to Task Planner",
-    //   payload.name
-    // );
+   await sendEmail(
+      payload.email,
+      "welcome_template",
+      "Welcome to Watney College",
+      payload.name
+    );
   } catch (error) {
     console.error("Error sending welcome email:", error);
   }
@@ -325,15 +267,9 @@ const EmailSendOTP = async (email: string) => {
     otpExpiry,
     isUsed: false,
   });
-  const emailSubject = "Validate Your Profile with OTP";
+  const emailSubject = "Watney College OTP – Please Verify Your Account";
 
-  await sendEmail(
-    email,
-    "verify_email",
-    emailSubject,
-    foundUser.name,
-    otp
-  );
+  await sendEmail(email, "resend_otp", emailSubject, foundUser.name, otp);
 
   await User.updateOne({ email }, { otp, otpExpiry });
 };
@@ -381,6 +317,10 @@ export const verifyEmailIntoDB = async (email: string, otp: string) => {
     config.jwt_refresh_expires_in as string
   );
 
+  const emailSubject ="Your Account Has Been Verified"
+    await sendEmail(foundUser.email, "complete_verification", emailSubject, foundUser.name);
+
+
   return {
     accessToken,
     refreshToken,
@@ -422,6 +362,10 @@ const user = await User.findOne({ _id: payload.userId }).select("+password");
   
   user.password = payload.password;
   await user.save();
+    const emailSubject = "Your Watney College Account Password Has Been Changed";
+
+    await sendEmail(user.email, "password_change", emailSubject, user.name);
+
 
   return { message: "Password updated successfully" };
 };
@@ -466,9 +410,9 @@ const requestOtp = async (email: string) => {
     otpExpiry,
     isUsed: false,
   });
-  const emailSubject = "Your Password Reset OTP";
+  const emailSubject = "Reset Your Account Password";
 
-  await sendEmail(
+ await sendEmail(
     email,
     "reset_password_template",
     emailSubject,

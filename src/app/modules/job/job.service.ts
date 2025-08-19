@@ -8,7 +8,7 @@ import { JobSearchableFields } from "./job.constant";
 const getAllJobFromDB = async (query: Record<string, unknown>) => {
   const JobQuery = new QueryBuilder(Job.find(), query)
     .search(JobSearchableFields)
-    .filter()
+    .filter(query)
     .sort()
     .paginate()
     .fields();

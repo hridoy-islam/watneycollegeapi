@@ -15,15 +15,32 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.sendEmail = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const ejs_1 = __importDefault(require("ejs"));
-const sendEmail = (to, template, subject, name, otp, title) => __awaiter(void 0, void 0, void 0, function* () {
+require("dotenv").config();
+const { google } = require("googleapis");
+const sendEmail = (to, template, subject, name, otp, title, email, term, studentType, phone, countryOfResidence, dob, availableFromDate) => __awaiter(void 0, void 0, void 0, function* () {
+    const oAuth2Client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, "https://developers.google.com/oauthplayground");
+    oAuth2Client.setCredentials({
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
+    });
+    const accessToken = yield oAuth2Client.getAccessToken();
+    console.log({
+        clientId: process.env.GOOGLE_CLIENT_ID,
+        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+        senderEmail: process.env.SENDER_EMAIL,
+    });
     const transporter = nodemailer_1.default.createTransport({
         // host: "smtp.ionos.co.uk",
         // port: 587,
         // secure: false,
         service: "Gmail",
         auth: {
-            user: "mahitasnimulhasan20@gmail.com",
-            pass: "zgyo izhr jrkh twgp",
+            type: "OAuth2",
+            user: process.env.SENDER_EMAIL,
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+            accessToken: (accessToken === null || accessToken === void 0 ? void 0 : accessToken.token) || "",
         },
     });
     try {
@@ -31,9 +48,18 @@ const sendEmail = (to, template, subject, name, otp, title) => __awaiter(void 0,
             otp: otp,
             name: name,
             title: title,
+            email: email,
+            term: term,
+            studentType: studentType,
+            phone: phone,
+            countryOfResidence: countryOfResidence,
+            dob: dob,
+            availableFromDate: availableFromDate,
+        }, {
+            async: true,
         });
         const mailOptions = {
-            from: "mahitasnimulhasan20@gmail.com",
+            from: process.env.SENDER_EMAIL,
             to,
             subject,
             html: html,

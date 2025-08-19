@@ -30,6 +30,14 @@ export const sendEmail = async (
     refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
   });
 
+  const accessToken = await oAuth2Client.getAccessToken();
+
+console.log({
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+  senderEmail: process.env.SENDER_EMAIL,
+});
   const transporter = nodemailer.createTransport({
     // host: "smtp.ionos.co.uk",
     // port: 587,
@@ -41,7 +49,7 @@ export const sendEmail = async (
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-      accessToken: process.env.GOOGLE_ACCESS_TOKEN,
+      accessToken: accessToken?.token || "",
     },
   });
 

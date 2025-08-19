@@ -21,7 +21,7 @@ const AppError_1 = __importDefault(require("../../errors/AppError"));
 const getAllUserFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const userQuery = new QueryBuilder_1.default(user_model_1.User.find(), query)
         .search(user_constant_1.UserSearchableFields)
-        .filter()
+        .filter(query)
         .sort()
         .paginate()
         .fields();

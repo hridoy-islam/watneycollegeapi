@@ -22,7 +22,7 @@ const createNotificationIntoDB = (payload) => __awaiter(void 0, void 0, void 0, 
 const getNotificationsFromDB = (userId, query) => __awaiter(void 0, void 0, void 0, function* () {
     // Start building the query
     const notificationQuery = new QueryBuilder_1.default(notification_model_1.Notification.find({ userId }).populate("senderId").populate("userId"), query)
-        .filter() // Apply filters
+        .filter(query) // Apply filters
         .sort() // Apply sorting
         .paginate() // Apply pagination
         .fields(); // Select specific fields

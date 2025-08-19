@@ -12,96 +12,75 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UploadDocumentService = exports.uploadDocument = void 0;
+exports.UploadDocumentService = void 0;
+const storage_1 = require("@google-cloud/storage");
 const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
-const promises_1 = __importDefault(require("fs/promises"));
-const path_1 = __importDefault(require("path"));
-const mammoth_1 = __importDefault(require("mammoth"));
+const user_model_1 = require("../user/user.model");
 const pdf_parse_1 = __importDefault(require("pdf-parse"));
-function extractTextFromPdf(buffer) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const data = yield (0, pdf_parse_1.default)(buffer);
-            if (!data.text || data.text.trim().length === 0) {
-                throw new Error('PDF appears to be empty or contains no extractable text');
-            }
-            return data.text;
+const storage = new storage_1.Storage({
+    keyFilename: "./work.json",
+    projectId: "vast-pride-453709-n7",
+});
+const bucketName = "watney";
+const bucket = storage.bucket(bucketName);
+const UploadDocumentToGCS = (file, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const { entityId, file_type } = payload;
+    try {
+        if (!file)
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "No file provided");
+        const fileName = `${Date.now()}-${file.originalname}`;
+        const gcsFile = bucket.file(fileName);
+        yield new Promise((resolve, reject) => {
+            const stream = gcsFile.createWriteStream({
+                metadata: { contentType: file.mimetype }, // Set metadata to determine file type
+            });
+            stream.on("error", (err) => {
+                console.error("Error during file upload:", err);
+                reject(err);
+            });
+            stream.on("finish", () => __awaiter(void 0, void 0, void 0, function* () {
+                try {
+                    // Make the file publicly accessible
+                    yield gcsFile.makePublic();
+                    resolve(true);
+                }
+                catch (err) {
+                    console.error("Error making the file public:", err);
+                    reject(err);
+                }
+            }));
+            // Send the file buffer to GCS
+            stream.end(file.buffer);
+        });
+        const fileUrl = `https://storage.googleapis.com/${bucketName}/${fileName}`;
+        const fileContentText = file.buffer.toString("utf-8");
+        // Check file type and determine where to save the file URL
+        if (file_type === "userProfile") {
+            const user = yield user_model_1.User.findById(entityId);
+            if (!user)
+                throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");
+            user.image = fileUrl;
+            yield user.save();
+            return { entityId, file_type, fileUrl };
         }
-        catch (error) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to parse PDF: ' + (error instanceof Error ? error.message : 'Invalid PDF format'));
+        else if (file_type === "studentDoc") {
+            return { entityId, file_type, fileUrl };
         }
-    });
-}
-function extractTextFromDocx(buffer) {
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const result = yield mammoth_1.default.extractRawText({ buffer });
-            if (!result.value || result.value.trim().length === 0) {
-                throw new Error('Document appears to be empty');
-            }
-            return result.value;
+        else if (file_type === "resumeDoc") {
+            const pdfData = yield (0, pdf_parse_1.default)(file.buffer);
+            const extractedText = pdfData.text;
+            return { entityId, file_type, fileUrl, fileContent: extractedText };
         }
-        catch (error) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to parse Word document: ' + (error instanceof Error ? error.message : 'Invalid document format'));
+        else if (file_type === "careerDoc") {
+            return { entityId, file_type, fileUrl };
         }
-    });
-}
-function uploadDocument(file, userId) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!file) {
-            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'No file uploaded');
-        }
-        const filePath = path_1.default.join(process.cwd(), 'uploads', file.filename);
-        let textContent = '';
-        try {
-            // Verify file exists before processing
-            try {
-                yield promises_1.default.access(filePath);
-            }
-            catch (_a) {
-                throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'File not found on server');
-            }
-            const buffer = yield promises_1.default.readFile(filePath);
-            // Extract text based on file type
-            if (file.mimetype === 'application/pdf') {
-                textContent = yield extractTextFromPdf(buffer);
-            }
-            else if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                file.mimetype === 'application/msword') {
-                textContent = yield extractTextFromDocx(buffer);
-            }
-            else {
-                throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Unsupported file type. Only PDF and Word documents are allowed');
-            }
-            return {
-                originalName: file.originalname,
-                textContent: textContent,
-                filePath: filePath
-            };
-        }
-        catch (error) {
-            // Clean up the uploaded file if processing fails
-            try {
-                yield promises_1.default.unlink(filePath);
-            }
-            catch (unlinkError) {
-                console.error('Failed to delete file:', unlinkError);
-            }
-            // If error is already an AppError, rethrow it
-            if (error instanceof AppError_1.default) {
-                throw error;
-            }
-            // Handle specific parsing errors
-            if (error instanceof Error && error.message.includes('PDF')) {
-                throw new AppError_1.default(http_status_1.default.BAD_REQUEST, 'Failed to parse PDF file. The file may be corrupted.');
-            }
-            throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, 'Failed to process document: ' + (error instanceof Error ? error.message : 'Unknown error'));
-        }
-    });
-}
-exports.uploadDocument = uploadDocument;
+    }
+    catch (error) {
+        console.error("File upload failed:", error);
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, "File upload failed");
+    }
+});
 exports.UploadDocumentService = {
-    // UploadDocumentToGCS,
-    uploadDocument
+    UploadDocumentToGCS,
 };

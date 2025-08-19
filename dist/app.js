@@ -65,6 +65,7 @@ app.use((0, cors_1.default)({
     origin: [
         "http://localhost:5173",
         "https://watneycollegeform.netlify.app",
+        "https://app.watneycollege.co.uk",
     ],
     credentials: true,
 }));

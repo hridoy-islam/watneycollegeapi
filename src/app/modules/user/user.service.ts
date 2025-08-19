@@ -8,7 +8,7 @@ import AppError from "../../errors/AppError";
 const getAllUserFromDB = async (query: Record<string, unknown>) => {
   const userQuery = new QueryBuilder(User.find(), query)
     .search(UserSearchableFields)
-    .filter()
+    .filter(query)
     .sort()
     .paginate()
     .fields();

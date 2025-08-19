@@ -21,7 +21,7 @@ const getAllApplicationCourseFromDB = async (
     query
   )
     .search(ApplicationCourseSearchableFields)
-    .filter()
+    .filter(query)
     .sort()
     .paginate()
     .fields();
@@ -101,19 +101,19 @@ const createApplicationCourseIntoDB = async (
     throw new Error("Failed to populate course application");
   }
 
-  const title = populatedResult?.courseId?.name;
-  const applicantName = populatedResult?.studentId?.name;
-  const applicantEmail = populatedResult?.studentId?.email;
+  const title = (populatedResult?.courseId as any)?.name;
+  const applicantName = (populatedResult?.studentId as any)?.name;
+  const applicantEmail = (populatedResult?.studentId as any)?.email;
   const adminSubject = `New Enrollment Submission for ${title}`;
-  const emailSubject = `Thank You for Applying to ${title}`;
+  const emailSubject = `Thank You for Applying to Watney College`;
   const otp = "";
-  const termName = populatedResult?.intakeId?.termName;
-  const studentType = populatedResult?.studentId?.studentType;
-  const phone = populatedResult?.studentId?.phone;
-  const countryOfResidence = populatedResult?.studentId?.countryOfResidence;
+  const termName = (populatedResult?.intakeId as any)?.termName;
+  const studentType = (populatedResult?.studentId as any)?.studentType;
+  const phone = (populatedResult?.studentId as any)?.phone;
+  const countryOfResidence =( populatedResult?.studentId as any)?.countryOfResidence;
   const studentStatus =
     studentType === "eu" ? "Home Student" : "International Student";
-  const dob = populatedResult?.studentId?.dateOfBirth;
+  const dob = (populatedResult?.studentId as any)?.dateOfBirth;
 
   const formattedDob = dob ? moment(dob).format("DD MMM, YYYY") : "N/A";
   await sendEmail(
@@ -127,7 +127,7 @@ const createApplicationCourseIntoDB = async (
 
   await sendEmail(
     "admission@watneycollege.co.uk",
-    "course-register-notification",
+    "course-register-admin",
     adminSubject,
     applicantName,
     otp,

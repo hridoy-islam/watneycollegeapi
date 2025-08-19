@@ -8,6 +8,7 @@ import { application } from "express";
 import mongoose from "mongoose";
 import { sendEmail } from "../../utils/sendEmail";
 import moment from "moment";
+import { sendEmailAdmin } from "../../utils/sendEmailAdmin";
 
 const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
   const { searchTerm, ...otherQueryParams } = query;
@@ -89,26 +90,26 @@ const createJobApplicationIntoDB = async (
     throw new Error("Failed to populate job application");
   }
 
-  const title = populatedResult?.jobId?.jobTitle;
-  const applicantName = populatedResult?.applicantId?.name;
-  const applicantEmail = populatedResult?.applicantId?.email;
+  const title = (populatedResult?.jobId as any)?.jobTitle;
+  const applicantName = (populatedResult?.applicantId as any)?.name;
+  const applicantEmail = (populatedResult?.applicantId as any)?.email;
 
-  const phone = populatedResult?.applicantId?.phone;
-const countryOfResidence = populatedResult?.applicantId?.countryOfResidence;
+  const phone = (populatedResult?.applicantId as any)?.phone;
+const countryOfResidence = (populatedResult?.applicantId as any)?.countryOfResidence;
 const formattedCountryOfResidence = countryOfResidence
   ? countryOfResidence.charAt(0).toUpperCase() + countryOfResidence.slice(1)
   : '';
  
-  const dob = populatedResult?.applicantId?.dateOfBirth;
+  const dob = (populatedResult?.applicantId as any)?.dateOfBirth;
   const formattedDob = dob ? moment(dob).format("DD MMM, YYYY") : "N/A";
-  const availableFromDate = populatedResult?.applicantId?.availableFromDate;
+  const availableFromDate = (populatedResult?.applicantId as any)?.availableFromDate;
   const formattedAvailableFromDate= availableFromDate ? moment(availableFromDate).format("DD MMM, YYYY") : "N/A";
 
 
-  const adminSubject = `New Enrollment Submission for ${title}`;
+  const adminSubject = `New Application Received: ${title}`;
 
 
-  const emailSubject = `New Application for ${title}`;
+  const emailSubject = `Thank you for applying to Watney College`;
   const otp = "";
   await sendEmail(
     applicantEmail,
@@ -119,8 +120,7 @@ const formattedCountryOfResidence = countryOfResidence
     title
   );
 
-
-  await sendEmail(
+  await sendEmailAdmin(
     "admission@watneycollege.co.uk",
     "job-application-admin",
     adminSubject,
@@ -133,6 +133,7 @@ const formattedCountryOfResidence = countryOfResidence
     formattedDob,
     formattedAvailableFromDate
   );
+
 
   return result;
 };

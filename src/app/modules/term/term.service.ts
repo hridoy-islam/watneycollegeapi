@@ -29,7 +29,7 @@ const createTermIntoDB = async (payload: TTerm) => {
 const getAllTermFromDB = async (query: Record<string, unknown>) => {
   const TermQuery = new QueryBuilder(Term.find(), query)
     .search(termSearchableFields)
-    .filter()
+    .filter(query)
     .sort()
     .paginate()
     .fields();

@@ -1,0 +1,107 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ApplicationCourseServices = void 0;
+const http_status_1 = __importDefault(require("http-status"));
+const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
+const AppError_1 = __importDefault(require("../../errors/AppError"));
+const applicationCourse_model_1 = require("./applicationCourse.model");
+const applicationCourse_constant_1 = require("./applicationCourse.constant");
+const sendEmail_1 = require("../../utils/sendEmail");
+const moment_1 = __importDefault(require("moment"));
+const getAllApplicationCourseFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
+    const ApplicationCourseQuery = new QueryBuilder_1.default(applicationCourse_model_1.ApplicationCourse.find()
+        .populate({
+        path: "studentId",
+        select: "title firstName initial lastName email phone studentType",
+    })
+        .populate("intakeId")
+        .populate("courseId"), query)
+        .search(applicationCourse_constant_1.ApplicationCourseSearchableFields)
+        .filter(query)
+        .sort()
+        .paginate()
+        .fields();
+    const meta = yield ApplicationCourseQuery.countTotal();
+    const result = yield ApplicationCourseQuery.modelQuery;
+    return {
+        meta,
+        result,
+    };
+});
+const getSingleApplicationCourseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield applicationCourse_model_1.ApplicationCourse.findById(id);
+    return result;
+});
+const updateApplicationCourseIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
+    const applicationCourse = yield applicationCourse_model_1.ApplicationCourse.findById(id);
+    if (!applicationCourse) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "ApplicationCourse not found");
+    }
+    const result = yield applicationCourse_model_1.ApplicationCourse.findByIdAndUpdate(id, payload, {
+        new: true,
+        runValidators: true,
+    });
+    return result;
+});
+const createApplicationCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const { courseId, intakeId, studentId } = payload;
+    // Ensure all required fields are provided
+    if (!courseId || !intakeId || !studentId) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Missing required fields: courseId, intakeId, and studentId are all required");
+    }
+    // Check if an application already exists with the same course, student, and intake
+    const existingApplication = yield applicationCourse_model_1.ApplicationCourse.findOne({
+        courseId,
+        intakeId,
+        studentId,
+    });
+    if (existingApplication) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "You have already applied for this course with the selected intake.");
+    }
+    const result = yield applicationCourse_model_1.ApplicationCourse.create(payload);
+    if (!result || !result._id) {
+        throw new Error("Course creation failed");
+    }
+    const populatedResult = yield applicationCourse_model_1.ApplicationCourse.findById(result._id)
+        .populate("courseId", "name")
+        .populate("intakeId", "termName")
+        .populate("studentId", "name email studentType phone countryOfResidence dateOfBirth");
+    if (!populatedResult) {
+        throw new Error("Failed to populate course application");
+    }
+    const title = (_a = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.courseId) === null || _a === void 0 ? void 0 : _a.name;
+    const applicantName = (_b = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _b === void 0 ? void 0 : _b.name;
+    const applicantEmail = (_c = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _c === void 0 ? void 0 : _c.email;
+    const adminSubject = `New Enrollment Submission for ${title}`;
+    const emailSubject = `Thank You for Applying to Watney College`;
+    const otp = "";
+    const termName = (_d = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.intakeId) === null || _d === void 0 ? void 0 : _d.termName;
+    const studentType = (_e = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _e === void 0 ? void 0 : _e.studentType;
+    const phone = (_f = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _f === void 0 ? void 0 : _f.phone;
+    const countryOfResidence = (_g = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _g === void 0 ? void 0 : _g.countryOfResidence;
+    const studentStatus = studentType === "eu" ? "Home Student" : "International Student";
+    const dob = (_h = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _h === void 0 ? void 0 : _h.dateOfBirth;
+    const formattedDob = dob ? (0, moment_1.default)(dob).format("DD MMM, YYYY") : "N/A";
+    yield (0, sendEmail_1.sendEmail)(applicantEmail, "course-register", emailSubject, applicantName, otp, title);
+    yield (0, sendEmail_1.sendEmail)("admission@watneycollege.co.uk", "course-register-admin", adminSubject, applicantName, otp, title, applicantEmail, termName, studentStatus, phone, countryOfResidence, formattedDob);
+    return result;
+});
+exports.ApplicationCourseServices = {
+    getAllApplicationCourseFromDB,
+    getSingleApplicationCourseFromDB,
+    updateApplicationCourseIntoDB,
+    createApplicationCourseIntoDB,
+};

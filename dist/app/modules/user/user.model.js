@@ -129,7 +129,6 @@ const userSchema = new mongoose_1.Schema({
     nationality: { type: String },
     ethnicity: { type: String },
     customEthnicity: { type: String },
-    countryOfDomicile: { type: String },
     countryOfBirth: { type: String },
     maritalStatus: { type: String },
     studentType: { type: String },
@@ -158,6 +157,19 @@ const userSchema = new mongoose_1.Schema({
     postalCity: { type: String },
     postalPostCode: { type: String },
     postalCountry: { type: String },
+    //career previous address
+    prevPostalAddressLine1: { type: String },
+    prevPostalAddressLine2: { type: String },
+    prevPostalCity: { type: String },
+    prevPostalPostCode: { type: String },
+    prevPostalCountry: { type: String },
+    //career applicants
+    isOver18: { type: Boolean },
+    isSubjectToImmigrationControl: { type: Boolean },
+    canWorkInUK: { type: Boolean },
+    hasTeamMemberRelationship: { type: Boolean },
+    hasDrivingLicence: { type: Boolean },
+    drivingConvictions: { type: String },
     // Emergency Contact
     emergencyContactNumber: { type: String },
     emergencyEmail: { type: String },
@@ -178,6 +190,7 @@ const userSchema = new mongoose_1.Schema({
     completedUKCourse: { type: String },
     visaRefusal: { type: String },
     visaRefusalDetail: { type: String },
+    hearAboutUs: { type: String },
     // Documents
     hasPassport: { type: Boolean },
     passportNumber: { type: String },
@@ -186,11 +199,10 @@ const userSchema = new mongoose_1.Schema({
     hasCertificates: { type: Boolean },
     certificatesDetails: { type: [String], default: [] },
     qualificationCertificates: { type: [String], default: [] },
-    cvResume: { type: [String], default: [] },
+    cvResume: { type: String },
     hasProofOfAddress: { type: Boolean },
     proofOfAddressType: { type: String },
     proofOfAddressDate: { type: String },
-    proofOfAddress: { type: [String], default: [] },
     otherDocuments: { type: [String], default: [] },
     otherDocumentsDescription: { type: String },
     // Employment
@@ -230,7 +242,7 @@ const userSchema = new mongoose_1.Schema({
                 qualification: { type: String },
                 awardDate: { type: Date },
                 grade: { type: String },
-                certificate: { type: String }
+                certificate: { type: String },
             },
         ],
         default: [],
@@ -279,16 +291,6 @@ const userSchema = new mongoose_1.Schema({
         email: { type: String },
         phone: { type: String },
     },
-    documents: {
-        type: [
-            {
-                type: { type: String },
-                fileUrl: { type: String },
-                customTitle: { type: String },
-            },
-        ],
-        default: [],
-    },
     englishQualification: {
         type: {
             englishTestType: { type: String },
@@ -297,11 +299,22 @@ const userSchema = new mongoose_1.Schema({
             englishCertificate: { type: String },
         },
     },
-    // declarationCorrectUpload: { type: Boolean },
-    // declarationContactReferee: { type: Boolean },
-    // criminalConviction: { type: Boolean },
-    // criminalConvictionDetails: { type: String },
-    // appliedBefore: { type: Boolean },
+    //fundingInformation:
+    fundingType: { type: String },
+    grantDetails: { type: String },
+    fundingCompanyName: { type: String },
+    fundingContactPerson: { type: String },
+    fundingEmail: { type: String },
+    fundingPhoneNumber: { type: String },
+    immigrationDocument: { type: [String], default: [] },
+    //student documents
+    passport: { type: [String], default: [] },
+    qualification: { type: [String], default: [] },
+    workExperience: { type: [String], default: [] },
+    personalStatement: { type: [String], default: [] },
+    bankStatement: { type: [String], default: [] },
+    proofOfAddress: { type: [String], default: [] },
+    photoId: { type: [String], default: [] },
 }, {
     timestamps: true,
 });
@@ -320,14 +333,14 @@ userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         const user = this; // doc
         if (user.isModified("password")) {
-            user === null || user === void 0 ? void 0 : user.password = yield bcrypt_1.default.hash(user === null || user === void 0 ? void 0 : user.password, Number(config_1.default.bcrypt_salt_rounds));
+            user.password = yield bcrypt_1.default.hash(user.password, Number(config_1.default.bcrypt_salt_rounds));
         }
         next();
     });
 });
 // set '' after saving password
 userSchema.post("save", function (doc, next) {
-    doc === null || doc === void 0 ? void 0 : doc.password = "";
+    doc.password = "";
     next();
 });
 userSchema.statics.isUserExists = function (email) {

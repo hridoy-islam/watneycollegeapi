@@ -17,31 +17,31 @@ const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
 const documents_service_1 = require("./documents.service");
-// const UploadDocument = catchAsync(async (req, res) => {
-//   const result = await UploadDocumentService.UploadDocumentToGCS(req.file, req.body);
-//   sendResponse(res, {
-//     statusCode: httpStatus.OK,
-//     success: true,
-//     message: "Upload document successfully",
-//     data: result,
-//   });
-// });
 const UploadDocument = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log('Uploaded file:', req.file);
-    if (!req.file) {
-        return res.status(http_status_1.default.BAD_REQUEST).json({
-            success: false,
-            message: 'No file uploaded',
-        });
-    }
-    const result = yield documents_service_1.UploadDocumentService.uploadDocument(req.file, req.body);
+    const result = yield documents_service_1.UploadDocumentService.UploadDocumentToGCS(req.file, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: 'Document uploaded and processed successfully',
+        message: "Upload document successfully",
         data: result,
     });
 }));
+// const UploadDocument = catchAsync(async (req, res) => {
+//   console.log('Uploaded file:', req.file);
+//   if (!req.file) {
+//     return res.status(httpStatus.BAD_REQUEST).json({
+//       success: false,
+//       message: 'No file uploaded',
+//     });
+//   }
+//   const result = await UploadDocumentService.uploadDocument(req.file, req.body);
+//   sendResponse(res, {
+//     statusCode: httpStatus.OK,
+//     success: true,
+//     message: 'Document uploaded and processed successfully',
+//     data: result,
+//   });
+// });
 exports.UploadDocumentController = {
     UploadDocument
 };
