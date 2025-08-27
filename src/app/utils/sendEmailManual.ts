@@ -4,20 +4,12 @@ import config from "../config";
 require("dotenv").config();
 const { google } = require("googleapis");
 
-export const sendEmail = async (
+export const sendEmailManual = async (
   to: string,
   template: string,
   subject: string,
-  name: string,
-  otp?: string,
-  title?: string,
-  email?: string,
-  term?: string,
-  studentType?: string,
-  phone?: string,
-  countryOfResidence?: string,
-  dob?: string,
-  availableFromDate?: string
+  body: string,
+  
 
 ) => {
   const oAuth2Client = new google.auth.OAuth2(
@@ -52,16 +44,7 @@ export const sendEmail = async (
     const html = await ejs.renderFile(
       __dirname + "/../static/email_template/" + template + ".ejs",
       {
-        otp: otp,
-        name: name,
-        title: title,
-        email: email,
-        term: term,
-        studentType: studentType,
-        phone: phone,
-        countryOfResidence: countryOfResidence,
-        dob: dob,
-        availableFromDate: availableFromDate,
+         body:body
       },
       {
         async: true,

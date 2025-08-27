@@ -9,6 +9,8 @@ import { TermRoutes } from "../modules/term/term.route";
 import { CourseRoutes } from "../modules/course/course.route";
 import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
 import { JobRoutes } from "../modules/job/job.route";
+import { EmailDraftRoutes } from "../modules/email-drafts/email-drafts.route";
+import { EmailRoutes } from "../modules/email/email.route";
 
 const router = Router();
 
@@ -49,6 +51,14 @@ const moduleRoutes = [
   {
     path: "/jobs",
     route: JobRoutes,
+  },
+  {
+    path: "/email-drafts",
+    route: EmailDraftRoutes,
+  },
+  {
+    path: "/email",
+    route: EmailRoutes,
   },
  
 ];
