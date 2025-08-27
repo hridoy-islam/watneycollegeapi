@@ -36,7 +36,12 @@ const getAllApplicationCourseFromDB = async (
 };
 
 const getSingleApplicationCourseFromDB = async (id: string) => {
-  const result = await ApplicationCourse.findById(id);
+  const result = await ApplicationCourse.findById(id).populate({
+        path: "studentId",
+        select: "title firstName initial lastName email phone studentType",
+      })
+      .populate("intakeId")
+      .populate("courseId");
   return result;
 };
 

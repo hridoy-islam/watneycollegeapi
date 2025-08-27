@@ -10,6 +10,8 @@ const term_route_1 = require("../modules/term/term.route");
 const course_route_1 = require("../modules/course/course.route");
 const applicationCourse_route_1 = require("../modules/applicationCourse/applicationCourse.route");
 const job_route_1 = require("../modules/job/job.route");
+const email_drafts_route_1 = require("../modules/email-drafts/email-drafts.route");
+const email_route_1 = require("../modules/email/email.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -47,6 +49,14 @@ const moduleRoutes = [
     {
         path: "/jobs",
         route: job_route_1.JobRoutes,
+    },
+    {
+        path: "/email-drafts",
+        route: email_drafts_route_1.EmailDraftRoutes,
+    },
+    {
+        path: "/email",
+        route: email_route_1.EmailRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

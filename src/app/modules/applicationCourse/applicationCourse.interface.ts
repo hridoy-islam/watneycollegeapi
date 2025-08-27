@@ -7,4 +7,6 @@ export interface TApplicationCourse {
   studentId: Types.ObjectId;
   seen: boolean;
   status: string;
+    createdAt?: Date;
+  updatedAt?: Date;
 }

@@ -12,12 +12,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendEmail = void 0;
+exports.sendEmailManual = void 0;
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const ejs_1 = __importDefault(require("ejs"));
 require("dotenv").config();
 const { google } = require("googleapis");
-const sendEmail = (to, template, subject, name, otp, title, email, term, studentType, phone, countryOfResidence, dob, availableFromDate) => __awaiter(void 0, void 0, void 0, function* () {
+const sendEmailManual = (to, template, subject, body) => __awaiter(void 0, void 0, void 0, function* () {
     const oAuth2Client = new google.auth.OAuth2(process.env.GOOGLE_CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET, "https://developers.google.com/oauthplayground");
     oAuth2Client.setCredentials({
         refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
@@ -39,16 +39,7 @@ const sendEmail = (to, template, subject, name, otp, title, email, term, student
     });
     try {
         const html = yield ejs_1.default.renderFile(__dirname + "/../static/email_template/" + template + ".ejs", {
-            otp: otp,
-            name: name,
-            title: title,
-            email: email,
-            term: term,
-            studentType: studentType,
-            phone: phone,
-            countryOfResidence: countryOfResidence,
-            dob: dob,
-            availableFromDate: availableFromDate,
+            body: body
         }, {
             async: true,
         });
@@ -66,4 +57,4 @@ const sendEmail = (to, template, subject, name, otp, title, email, term, student
         throw error;
     }
 });
-exports.sendEmail = sendEmail;
+exports.sendEmailManual = sendEmailManual;

@@ -41,7 +41,12 @@ const getAllApplicationCourseFromDB = (query) => __awaiter(void 0, void 0, void 
     };
 });
 const getSingleApplicationCourseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield applicationCourse_model_1.ApplicationCourse.findById(id);
+    const result = yield applicationCourse_model_1.ApplicationCourse.findById(id).populate({
+        path: "studentId",
+        select: "title firstName initial lastName email phone studentType",
+    })
+        .populate("intakeId")
+        .populate("courseId");
     return result;
 });
 const updateApplicationCourseIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
