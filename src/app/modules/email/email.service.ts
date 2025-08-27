@@ -10,8 +10,9 @@ import { sendEmailManual } from "../../utils/sendEmailManual";
 import { User } from "../user/user.model";
 
 import moment from "moment";
+import Course from "../course/course.model";
 
-const createEmailIntoDB = async (payload: TEmail) => {
+const createEmailIntoDB = async (payload:any) => {
   try {
     const {
       emailDraft,
@@ -19,68 +20,83 @@ const createEmailIntoDB = async (payload: TEmail) => {
       issuedBy,
       subject: emailSubject,
       body: emailBody,
+      courseId,
     } = payload;
 
+    // Find user
     const foundUser = await User.findById(userId);
     if (!foundUser) {
-      throw new AppError(httpStatus.NOT_FOUND, "User not found");
+      throw new AppError(httpStatus.NOT_FOUND, 'User not found');
     }
 
-   
-   
-    // Regex for placeholders
-    const variableRegex = /\[([^\]]+)\]/g;
-    let updatedBody = emailBody;
-    let match;
-
-    while ((match = variableRegex.exec(emailBody)) !== null) {
-      const key = match[1]; // e.g. "name", "dateOfBirth", "admin"
-
-      let value: string | undefined;
-
-      if (key === "admin") {
-        value = "Watney College";
-      } else if (key === "adminEmail") {
-        value = "info@watneycollege.co.uk";
-      } else if (key === "dateOfBirth" && foundUser.dateOfBirth) {
-        value = moment(foundUser.dateOfBirth).format("DD MMM, YYYY");
-      } else {
-        value = (foundUser as any)[key];
-      }
-
-      if (value !== undefined) {
-        const placeholder = `\\[${key}\\]`;
-        const regex = new RegExp(placeholder, "g");
-        updatedBody = updatedBody.replace(regex, value);
-      } else {
-        console.warn(`Placeholder [${key}] not found in user/admin data`);
-      }
+    // Fetch course name if courseId is provided
+    let courseName = '';
+    if (courseId) {
+      const course = await Course.findById(courseId);
+      courseName = course?.name || '';
     }
-    const finalBody = updatedBody.replace(/\n/g, "<br/>");
-    // create email record in DB
+
+    // Helper to replace variables
+    const replaceVariable = (text: string): string => {
+      return text
+        .replace(/\[admin\]/g, 'Watney College')
+        .replace(/\[adminEmail\]/g, 'info@watneycollege.co.uk')
+        .replace(/\[courseName\]/g, courseName)
+        .replace(/\[name\]/g, foundUser.name || '')
+        .replace(/\[title\]/g, foundUser.title || '')
+        .replace(/\[firstName\]/g, foundUser.firstName || '')
+        .replace(/\[lastName\]/g, foundUser.lastName || '')
+        .replace(/\[phone\]/g, foundUser.phone || '')
+        .replace(/\[dateOfBirth\]/g, foundUser.dateOfBirth ? moment(foundUser.dateOfBirth).format('DD MMM, YYYY') : '')
+        .replace(/\[email\]/g, foundUser.email || '')
+        .replace(/\[countryOfBirth\]/g, foundUser.countryOfBirth || '')
+        .replace(/\[nationality\]/g, foundUser.nationality || '')
+        .replace(/\[countryOfResidence\]/g, foundUser.countryOfResidence || '')
+        .replace(/\[ethnicity\]/g, foundUser.ethnicity || '')
+        .replace(/\[gender\]/g, foundUser.gender || '')
+        .replace(/\[postalAddressLine1\]/g, foundUser.postalAddressLine1 || '')
+        .replace(/\[postalAddressLine2\]/g, foundUser.postalAddressLine2 || '')
+        .replace(/\[postalCity\]/g, foundUser.postalCity || '')
+        .replace(/\[postalCountry\]/g, foundUser.postalCountry || '')
+        .replace(/\[postalPostCode\]/g, foundUser.postalPostCode || '')
+        .replace(/\[residentialAddressLine1\]/g, foundUser.residentialAddressLine1 || '')
+        .replace(/\[residentialAddressLine2\]/g, foundUser.residentialAddressLine2 || '')
+        .replace(/\[residentialCity\]/g, foundUser.residentialCity || '')
+        .replace(/\[residentialCountry\]/g, foundUser.residentialCountry || '')
+        .replace(/\[residentialPostCode\]/g, foundUser.residentialPostCode || '')
+        .replace(/\[emergencyAddress\]/g, foundUser.emergencyAddress || '')
+        .replace(/\[emergencyContactNumber\]/g, foundUser.emergencyContactNumber || '')
+        .replace(/\[emergencyEmail\]/g, foundUser.emergencyEmail || '')
+        .replace(/\[emergencyFullName\]/g, foundUser.emergencyFullName || '')
+        .replace(/\[emergencyRelationship\]/g, foundUser.emergencyRelationship || '')
+        .replace(/\[applicationLocation\]/g, foundUser.applicationLocation || '');
+    };
+
+    // Replace variables in subject and body
+    const processedSubject = replaceVariable(emailSubject);
+    const processedBody = replaceVariable(emailBody);
+
+    // Save email with processed body (plain text with variables replaced)
     const result = await Email.create({
       ...payload,
-      body: updatedBody,
+      subject: processedSubject,
+      body: processedBody, // Already replaced
     });
 
-    // send email manually
-    await sendEmailManual(
-      foundUser.email,
-      "custom_template",
-      emailSubject,
-      finalBody
-    );
+    // Send email (with <br/> for line breaks)
+    const htmlBody = processedBody.replace(/\n/g, '<br/>');
+    await sendEmailManual(foundUser.email, 'custom_template', processedSubject, htmlBody);
 
-    // update status
+    // Update status to 'sent'
     const updatedEmail = await Email.findByIdAndUpdate(
       result._id,
-      { status: "sent" },
+      { status: 'sent' },
       { new: true, runValidators: true }
     );
 
     return updatedEmail;
   } catch (error: any) {
-    console.error("Error in createEmailIntoDB:", error);
+    console.error('Error in createEmailIntoDB:', error);
 
     if (error instanceof AppError) {
       throw error;
@@ -88,7 +104,7 @@ const createEmailIntoDB = async (payload: TEmail) => {
 
     throw new AppError(
       httpStatus.INTERNAL_SERVER_ERROR,
-      error.message || "Failed to create or send email"
+      error.message || 'Failed to create or send email'
     );
   }
 };
