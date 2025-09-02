@@ -272,7 +272,7 @@ const createEmailIntoDB = async (payload: any) => {
             // ✅ Replace with <img> tag for rendering in email
             return {
               placeholder,
-              replacement: `<img src="${url}" alt="Signature" style="max-width: 150px; margin: 10px 0;" />`,
+              replacement: `<img src="${url}" alt="Signature" style="max-width: 120px; margin-top: 20px;" />`,
             };
           }
           return { placeholder, replacement: "" };
