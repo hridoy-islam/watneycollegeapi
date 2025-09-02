@@ -11,6 +11,8 @@ import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicatio
 import { JobRoutes } from "../modules/job/job.route";
 import { EmailDraftRoutes } from "../modules/email-drafts/email-drafts.route";
 import { EmailRoutes } from "../modules/email/email.route";
+import { CourseCodeRoutes } from "../modules/course-code/course-code.route";
+import { SignatureRoutes } from "../modules/signature/signature.route";
 
 const router = Router();
 
@@ -59,6 +61,15 @@ const moduleRoutes = [
   {
     path: "/email",
     route: EmailRoutes,
+  },
+  {
+    path: "/course-code",
+    route: CourseCodeRoutes,
+  },
+ 
+  {
+    path: "/signature",
+    route: SignatureRoutes,
   },
  
 ];

@@ -64,6 +64,8 @@ const UploadDocumentToGCS = async (file: any, payload: any) => {
       return { entityId, file_type, fileUrl, fileContent: extractedText };
     } else if (file_type === "careerDoc") {
       return { entityId, file_type, fileUrl };
+    }else if (file_type === "signatureDoc") {
+      return { entityId, file_type, fileUrl };
     }
   } catch (error) {
     console.error("File upload failed:", error);
