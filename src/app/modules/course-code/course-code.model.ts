@@ -3,13 +3,9 @@ import { TcourseCode} from "./course-code.interface";
 
 const courseCodeSchema = new Schema(
   {
-    course: { type: Schema.Types.ObjectId, ref: 'Course', required: true },
+    course: { type: String,  required: true },
     courseCode: { type: String, required: true },
-    status: {
-      type: Number,
-      enum: [0, 1],
-      default: 1,
-    },
+    
   }
 );
 

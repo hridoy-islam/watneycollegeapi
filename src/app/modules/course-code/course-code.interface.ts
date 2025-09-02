@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export interface TcourseCode {
-  course: Types.ObjectId;
+  course: string;
   courseCode: string;
-  status:0 |1;
+  
 }

@@ -245,15 +245,14 @@ const createEmailIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
             const courseCodeRegex = /\[courseCode=["']([^"']+)["']\]/g;
             const courseCodeMatches = [...replacedText.matchAll(courseCodeRegex)];
             const courseCodePromises = courseCodeMatches.map((match) => __awaiter(void 0, void 0, void 0, function* () {
-                var _c;
                 const courseCode = match[1];
                 const placeholder = match[0];
                 try {
                     const course = yield course_code_model_1.default.findOne({ courseCode: courseCode }).populate('course');
-                    const courseName = (_c = course === null || course === void 0 ? void 0 : course.course) === null || _c === void 0 ? void 0 : _c.name;
+                    const courseName = course === null || course === void 0 ? void 0 : course.course;
                     return {
                         placeholder,
-                        replacement: courseName || courseCode,
+                        replacement: courseName,
                     };
                 }
                 catch (error) {
@@ -267,7 +266,7 @@ const createEmailIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
                 const replacements = yield Promise.all(allPromises);
                 // Apply all replacements to the text
                 replacements.forEach(({ placeholder, replacement }) => {
-                    replacedText = replacedText.replace(new RegExp(escapeRegExp(placeholder), 'g'), replacement);
+                    replacedText = replacedText.replace(new RegExp(escapeRegExp(placeholder), 'g'), replacement !== null && replacement !== void 0 ? replacement : '');
                 });
             }
             return replacedText;

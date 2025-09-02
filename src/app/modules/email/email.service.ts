@@ -292,11 +292,11 @@ const createEmailIntoDB = async (payload: any) => {
 
         try {
           const course = await CourseCode.findOne({ courseCode: courseCode }).populate('course');
-          const courseName =( course?.course as any)?.name;
+          const courseName = course?.course;
 
           return {
             placeholder,
-            replacement: courseName || courseCode,
+            replacement: courseName,
           };
         } catch (error) {
           console.error(`Error fetching course ${courseCode}:`, error);
@@ -312,7 +312,7 @@ const createEmailIntoDB = async (payload: any) => {
 
         // Apply all replacements to the text
         replacements.forEach(({ placeholder, replacement }) => {
-          replacedText = replacedText.replace(new RegExp(escapeRegExp(placeholder), 'g'), replacement);
+          replacedText = replacedText.replace(new RegExp(escapeRegExp(placeholder), 'g'), replacement ??'');
         });
       }
 
