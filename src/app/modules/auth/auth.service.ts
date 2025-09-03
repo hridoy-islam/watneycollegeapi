@@ -241,16 +241,16 @@ const createUserIntoDB = async (payload: TCreateUser) => {
 
   const result = await User.create(newUserPayload);
 
-  try {
-   await sendEmail(
-      payload.email,
-      "welcome_template",
-      "Welcome to Watney College",
-      payload.name
-    );
-  } catch (error) {
-    console.error("Error sending welcome email:", error);
-  }
+  // try {
+  //  await sendEmail(
+  //     payload.email,
+  //     "welcome_template",
+  //     "Welcome to Watney College",
+  //     payload.name
+  //   );
+  // } catch (error) {
+  //   console.error("Error sending welcome email:", error);
+  // }
 
   return result;
 };
