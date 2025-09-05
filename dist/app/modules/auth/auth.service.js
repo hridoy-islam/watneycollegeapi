@@ -162,16 +162,12 @@ const createUserIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
     const { otp, otpExpiry } = generateOtpAndExpiry();
     const newUserPayload = Object.assign({}, payload);
     const result = yield user_model_1.User.create(newUserPayload);
-    // try {
-    //  await sendEmail(
-    //     payload.email,
-    //     "welcome_template",
-    //     "Welcome to Watney College",
-    //     payload.name
-    //   );
-    // } catch (error) {
-    //   console.error("Error sending welcome email:", error);
-    // }
+    try {
+        yield (0, sendEmail_1.sendEmail)(payload.email, "welcome_template", "Welcome to Watney College", payload.name);
+    }
+    catch (error) {
+        console.error("Error sending welcome email:", error);
+    }
     return result;
 });
 const EmailSendOTP = (email) => __awaiter(void 0, void 0, void 0, function* () {

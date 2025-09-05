@@ -12,6 +12,7 @@ const ApplicationCourseSchema = new mongoose_1.Schema({
         enum: ["applied", "cancelled", "approved"],
         default: "applied",
     },
+    refId: { type: String }
 }, {
     timestamps: true,
 });

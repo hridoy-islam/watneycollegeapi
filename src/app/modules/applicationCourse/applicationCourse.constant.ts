@@ -1,3 +1,3 @@
 
 
-export const ApplicationCourseSearchableFields = ["courseId"];
+export const ApplicationCourseSearchableFields = ["courseId","intakeId","refId"];

@@ -21,8 +21,8 @@ const email_model_1 = __importDefault(require("./email.model"));
 const sendEmailManual_1 = require("../../utils/sendEmailManual");
 const user_model_1 = require("../user/user.model");
 const moment_1 = __importDefault(require("moment"));
+const course_model_1 = __importDefault(require("../course/course.model"));
 const applicationCourse_model_1 = require("../applicationCourse/applicationCourse.model");
-const course_code_model_1 = __importDefault(require("../course-code/course-code.model"));
 const signature_model_1 = __importDefault(require("../signature/signature.model"));
 // const createEmailIntoDB = async (payload: any) => {
 //   try {
@@ -165,6 +165,7 @@ const createEmailIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
         let intake = "";
         let applicationStatus = "";
         let applicationDate = "";
+        let studentId = "";
         if (applicationId) {
             const application = yield applicationCourse_model_1.ApplicationCourse.findById(applicationId)
                 .populate("courseId")
@@ -172,6 +173,7 @@ const createEmailIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
             courseName = ((_a = application === null || application === void 0 ? void 0 : application.courseId) === null || _a === void 0 ? void 0 : _a.name) || "";
             intake = ((_b = application === null || application === void 0 ? void 0 : application.intakeId) === null || _b === void 0 ? void 0 : _b.termName) || "";
             applicationStatus = (application === null || application === void 0 ? void 0 : application.status) || "";
+            studentId = (application === null || application === void 0 ? void 0 : application.refId) || "";
             applicationDate = (application === null || application === void 0 ? void 0 : application.createdAt)
                 ? (0, moment_1.default)(application.createdAt).format("DD MMM, YYYY")
                 : "";
@@ -185,6 +187,7 @@ const createEmailIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
                 .replace(/\[adminEmail\]/g, "info@watneycollege.co.uk")
                 .replace(/\[courseName\]/g, courseName)
                 .replace(/\[intake\]/g, intake)
+                .replace(/\[studentId\]/g, studentId)
                 .replace(/\[applicationStatus\]/g, applicationStatus)
                 .replace(/\[applicationDate\]/g, applicationDate)
                 .replace(/\[todayDate\]/g, (0, moment_1.default)().format("DD MMM, YYYY"))
@@ -248,8 +251,8 @@ const createEmailIntoDB = (payload) => __awaiter(void 0, void 0, void 0, functio
                 const courseCode = match[1];
                 const placeholder = match[0];
                 try {
-                    const course = yield course_code_model_1.default.findOne({ courseCode: courseCode }).populate('course');
-                    const courseName = course === null || course === void 0 ? void 0 : course.course;
+                    const course = yield course_model_1.default.findOne({ courseCode: courseCode });
+                    const courseName = course === null || course === void 0 ? void 0 : course.name;
                     return {
                         placeholder,
                         replacement: courseName,

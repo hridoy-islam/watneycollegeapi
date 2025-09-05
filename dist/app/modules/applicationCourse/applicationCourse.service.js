@@ -20,6 +20,77 @@ const applicationCourse_model_1 = require("./applicationCourse.model");
 const applicationCourse_constant_1 = require("./applicationCourse.constant");
 const sendEmail_1 = require("../../utils/sendEmail");
 const moment_1 = __importDefault(require("moment"));
+const course_model_1 = __importDefault(require("../course/course.model"));
+// const generateRefId = async (courseId: string): Promise<string> => {
+//   const course = await Course.findById(courseId).select("courseCode");
+//   if (!course || !course.courseCode) {
+//     throw new Error("Invalid course or courseCode not found");
+//   }
+//   const now = moment();
+//   const yy = now.format("YY"); // last 2 digits of year
+//   const mm = now.format("MM"); // month
+//   const courseCode = course.courseCode;
+//   // Find the latest application for this course in this month
+//   const startOfMonth = now.startOf("month").toDate();
+//   const endOfMonth = now.endOf("month").toDate();
+//   const lastApplication = await ApplicationCourse.findOne({
+//     courseId,
+//     createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+//   })
+//     .sort({ createdAt: -1 }) // get latest
+//     .select("refId");
+//   // Extract last serial
+//   let serialNumber = 1;
+//   if (lastApplication?.refId) {
+//     const lastSerialStr = lastApplication.refId.slice(-3); // last 3 digits
+//     const lastSerial = parseInt(lastSerialStr, 10);
+//     serialNumber = lastSerial + 1;
+//   }
+//   const serial = String(serialNumber).padStart(3, "0");
+//   // Format: WC-YY-MM-CC-0SN
+//   const refId = `WC${yy}${mm}${courseCode}${serial}`;
+//   return refId;
+// };
+const generateRefId = (courseId) => __awaiter(void 0, void 0, void 0, function* () {
+    const course = yield course_model_1.default.findById(courseId).select("courseCode");
+    if (!course || !course.courseCode) {
+        throw new Error("Invalid course or courseCode not found");
+    }
+    const now = (0, moment_1.default)();
+    const yy = now.format("YY"); // last 2 digits of year
+    const mm = now.format("MM"); // month
+    const courseCode = course.courseCode;
+    // Month boundaries
+    const startOfMonth = now.clone().startOf("month").toDate();
+    const endOfMonth = now.clone().endOf("month").toDate();
+    // Find the latest application for this course in this month
+    const lastApplication = yield applicationCourse_model_1.ApplicationCourse.findOne({
+        courseId,
+        createdAt: { $gte: startOfMonth, $lte: endOfMonth },
+    })
+        .sort({ createdAt: -1 })
+        .select("refId");
+    // Initial serial number
+    let serialNumber = 1;
+    if (lastApplication === null || lastApplication === void 0 ? void 0 : lastApplication.refId) {
+        const lastSerialStr = lastApplication.refId.slice(-3); // last 3 digits
+        const lastSerial = parseInt(lastSerialStr, 10);
+        serialNumber = isNaN(lastSerial) ? 1 : lastSerial + 1;
+    }
+    let refId;
+    let exists = true;
+    // Loop until a unique refId is found
+    while (exists) {
+        const serial = String(serialNumber).padStart(3, "0");
+        refId = `WC${yy}${mm}${courseCode}${serial}`;
+        // Check if this refId already exists
+        exists = !!(yield applicationCourse_model_1.ApplicationCourse.exists({ refId }));
+        if (exists) {
+            serialNumber++; // increment and try again
+        }
+    }
+    return refId;
+});
 const getAllApplicationCourseFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const ApplicationCourseQuery = new QueryBuilder_1.default(applicationCourse_model_1.ApplicationCourse.find()
         .populate({
@@ -41,7 +112,8 @@ const getAllApplicationCourseFromDB = (query) => __awaiter(void 0, void 0, void 
     };
 });
 const getSingleApplicationCourseFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield applicationCourse_model_1.ApplicationCourse.findById(id).populate({
+    const result = yield applicationCourse_model_1.ApplicationCourse.findById(id)
+        .populate({
         path: "studentId",
         select: "title firstName initial lastName email phone studentType",
     })
@@ -76,7 +148,8 @@ const createApplicationCourseIntoDB = (payload) => __awaiter(void 0, void 0, voi
     if (existingApplication) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "You have already applied for this course with the selected intake.");
     }
-    const result = yield applicationCourse_model_1.ApplicationCourse.create(payload);
+    const refId = yield generateRefId(courseId.toString());
+    const result = yield applicationCourse_model_1.ApplicationCourse.create(Object.assign(Object.assign({}, payload), { refId }));
     if (!result || !result._id) {
         throw new Error("Course creation failed");
     }

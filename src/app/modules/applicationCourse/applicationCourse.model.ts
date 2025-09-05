@@ -15,6 +15,7 @@ const ApplicationCourseSchema = new Schema<TApplicationCourse>(
       default: "applied",
     
     },
+    refId:{ type: String}
   },
   {
     timestamps: true,

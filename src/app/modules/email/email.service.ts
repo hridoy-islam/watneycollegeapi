@@ -12,7 +12,6 @@ import { User } from "../user/user.model";
 import moment from "moment";
 import Course from "../course/course.model";
 import { ApplicationCourse } from "../applicationCourse/applicationCourse.model";
-import CourseCode from "../course-code/course-code.model";
 import Signature from "../signature/signature.model";
 
 // const createEmailIntoDB = async (payload: any) => {
@@ -178,6 +177,7 @@ const createEmailIntoDB = async (payload: any) => {
     let intake = "";
     let applicationStatus = "";
     let applicationDate = "";
+    let studentId = "";
 
     if (applicationId) {
       const application = await ApplicationCourse.findById(applicationId)
@@ -186,6 +186,7 @@ const createEmailIntoDB = async (payload: any) => {
       courseName = (application?.courseId as any)?.name || "";
       intake = (application?.intakeId as any)?.termName || "";
       applicationStatus = application?.status || "";
+      studentId= application?.refId || "";
       applicationDate = application?.createdAt
         ? moment(application.createdAt).format("DD MMM, YYYY")
         : "";
@@ -201,6 +202,7 @@ const createEmailIntoDB = async (payload: any) => {
         .replace(/\[adminEmail\]/g, "info@watneycollege.co.uk")
         .replace(/\[courseName\]/g, courseName)
         .replace(/\[intake\]/g, intake)
+        .replace(/\[studentId\]/g, studentId)
         .replace(/\[applicationStatus\]/g, applicationStatus)
         .replace(/\[applicationDate\]/g, applicationDate)
         .replace(/\[todayDate\]/g, moment().format("DD MMM, YYYY"))
@@ -291,8 +293,8 @@ const createEmailIntoDB = async (payload: any) => {
         const placeholder = match[0];
 
         try {
-          const course = await CourseCode.findOne({ courseCode: courseCode }).populate('course');
-          const courseName = course?.course;
+          const course = await Course.findOne({ courseCode: courseCode });
+          const courseName = course?.name;
 
           return {
             placeholder,

@@ -12,7 +12,6 @@ const applicationCourse_route_1 = require("../modules/applicationCourse/applicat
 const job_route_1 = require("../modules/job/job.route");
 const email_drafts_route_1 = require("../modules/email-drafts/email-drafts.route");
 const email_route_1 = require("../modules/email/email.route");
-const course_code_route_1 = require("../modules/course-code/course-code.route");
 const signature_route_1 = require("../modules/signature/signature.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
@@ -59,10 +58,6 @@ const moduleRoutes = [
     {
         path: "/email",
         route: email_route_1.EmailRoutes,
-    },
-    {
-        path: "/course-code",
-        route: course_code_route_1.CourseCodeRoutes,
     },
     {
         path: "/signature",

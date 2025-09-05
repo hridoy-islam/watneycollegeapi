@@ -4,6 +4,7 @@ import { TCourse} from "./course.interface";
 const courseSchema = new Schema(
   {
     name: { type: String, required: true },
+    courseCode: { type: String, required: true },
     status: {
       type: Number,
       enum: [0, 1],
