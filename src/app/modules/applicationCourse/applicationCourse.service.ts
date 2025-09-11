@@ -7,6 +7,8 @@ import { ApplicationCourseSearchableFields } from "./applicationCourse.constant"
 import { sendEmail } from "../../utils/sendEmail";
 import moment from "moment";
 import Course from "../course/course.model";
+import { sendEmailUpdateCourse } from "../../utils/sendEmailUpdateCourse";
+import { sendEmailAdminCourse } from "../../utils/sendEmailAdminCourse";
 
 // const generateRefId = async (courseId: string): Promise<string> => {
 //   const course = await Course.findById(courseId).select("courseCode");
@@ -133,21 +135,102 @@ const getSingleApplicationCourseFromDB = async (id: string) => {
   return result;
 };
 
+// const updateApplicationCourseIntoDB = async (
+//   id: string,
+//   payload: Partial<TApplicationCourse>
+// ) => {
+//   const applicationCourse = await ApplicationCourse.findById(id);
+//   if (!applicationCourse) {
+//     throw new AppError(httpStatus.NOT_FOUND, "ApplicationCourse not found");
+//   }
+
+//   const result = await ApplicationCourse.findByIdAndUpdate(id, payload, {
+//     new: true,
+//     runValidators: true,
+//   });
+
+//   return result;
+// };
+
 const updateApplicationCourseIntoDB = async (
   id: string,
   payload: Partial<TApplicationCourse>
 ) => {
-  const applicationCourse = await ApplicationCourse.findById(id);
+  // Step 1: Fetch the current application course with populated data
+  const applicationCourse = await ApplicationCourse.findById(id)
+    .populate("courseId", "name") // assuming courseId refs a Course model with 'name'
+    .populate("intakeId", "termName") // assuming intakeId refs an Intake model with 'termName'
+    .populate("studentId", "name email phone"); // assuming studentId refs a Student model
+
   if (!applicationCourse) {
     throw new AppError(httpStatus.NOT_FOUND, "ApplicationCourse not found");
   }
 
-  const result = await ApplicationCourse.findByIdAndUpdate(id, payload, {
-    new: true,
-    runValidators: true,
-  });
+  const previousCourseName = (applicationCourse.courseId as any)?.name || "";
 
-  return result;
+  // Step 2: Perform the update
+  const updatedApplicationCourse = await ApplicationCourse.findByIdAndUpdate(
+    id,
+    payload,
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
+    .populate("courseId", "name")
+    .populate("intakeId", "termName")
+    .populate("studentId", "name email phone");
+
+  if (!updatedApplicationCourse) {
+    throw new AppError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Failed to update ApplicationCourse"
+    );
+  }
+
+  // Step 3: Extract data for email
+  const { studentId, courseId, intakeId } = updatedApplicationCourse;
+
+  const emailData = {
+    studentName: (studentId as any)?.name,
+    studentEmail: (studentId as any)?.email,
+    courseName: (courseId as any)?.name,
+    termName: (intakeId as any)?.termName,
+    previousCourseName,
+  };
+
+  // Step 4: Send email notification
+  try {
+    await sendEmailUpdateCourse(
+      emailData.studentEmail,
+      "course-change",
+      "Your Application Details Have Been Updated",
+      emailData.studentName,
+      emailData.studentEmail,
+      emailData.courseName,
+      emailData.termName,
+      previousCourseName
+    );
+  } catch (emailError) {
+    console.warn("Failed to send update email:", emailError);
+  }
+
+  try {
+    await sendEmailAdminCourse(
+      "admissions@watneycollege.co.uk",
+      "course-change-admin",
+      "Student Application Course Updated",
+      emailData.studentName,
+      emailData.studentEmail,
+      emailData.courseName,
+      emailData.termName,
+      emailData.previousCourseName,
+    );
+  } catch (adminEmailError) {
+    console.warn("Failed to send admin notification email:", adminEmailError);
+  }
+
+  return updatedApplicationCourse;
 };
 
 const createApplicationCourseIntoDB = async (

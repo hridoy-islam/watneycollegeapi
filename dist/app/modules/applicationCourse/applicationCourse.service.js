@@ -21,6 +21,8 @@ const applicationCourse_constant_1 = require("./applicationCourse.constant");
 const sendEmail_1 = require("../../utils/sendEmail");
 const moment_1 = __importDefault(require("moment"));
 const course_model_1 = __importDefault(require("../course/course.model"));
+const sendEmailUpdateCourse_1 = require("../../utils/sendEmailUpdateCourse");
+const sendEmailAdminCourse_1 = require("../../utils/sendEmailAdminCourse");
 // const generateRefId = async (courseId: string): Promise<string> => {
 //   const course = await Course.findById(courseId).select("courseCode");
 //   if (!course || !course.courseCode) {
@@ -121,19 +123,68 @@ const getSingleApplicationCourseFromDB = (id) => __awaiter(void 0, void 0, void 
         .populate("courseId");
     return result;
 });
+// const updateApplicationCourseIntoDB = async (
+//   id: string,
+//   payload: Partial<TApplicationCourse>
+// ) => {
+//   const applicationCourse = await ApplicationCourse.findById(id);
+//   if (!applicationCourse) {
+//     throw new AppError(httpStatus.NOT_FOUND, "ApplicationCourse not found");
+//   }
+//   const result = await ApplicationCourse.findByIdAndUpdate(id, payload, {
+//     new: true,
+//     runValidators: true,
+//   });
+//   return result;
+// };
 const updateApplicationCourseIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const applicationCourse = yield applicationCourse_model_1.ApplicationCourse.findById(id);
+    var _a;
+    // Step 1: Fetch the current application course with populated data
+    const applicationCourse = yield applicationCourse_model_1.ApplicationCourse.findById(id)
+        .populate("courseId", "name") // assuming courseId refs a Course model with 'name'
+        .populate("intakeId", "termName") // assuming intakeId refs an Intake model with 'termName'
+        .populate("studentId", "name email phone"); // assuming studentId refs a Student model
     if (!applicationCourse) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "ApplicationCourse not found");
     }
-    const result = yield applicationCourse_model_1.ApplicationCourse.findByIdAndUpdate(id, payload, {
+    const previousCourseName = ((_a = applicationCourse.courseId) === null || _a === void 0 ? void 0 : _a.name) || "";
+    // Step 2: Perform the update
+    const updatedApplicationCourse = yield applicationCourse_model_1.ApplicationCourse.findByIdAndUpdate(id, payload, {
         new: true,
         runValidators: true,
-    });
-    return result;
+    })
+        .populate("courseId", "name")
+        .populate("intakeId", "termName")
+        .populate("studentId", "name email phone");
+    if (!updatedApplicationCourse) {
+        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, "Failed to update ApplicationCourse");
+    }
+    // Step 3: Extract data for email
+    const { studentId, courseId, intakeId } = updatedApplicationCourse;
+    const emailData = {
+        studentName: studentId === null || studentId === void 0 ? void 0 : studentId.name,
+        studentEmail: studentId === null || studentId === void 0 ? void 0 : studentId.email,
+        courseName: courseId === null || courseId === void 0 ? void 0 : courseId.name,
+        termName: intakeId === null || intakeId === void 0 ? void 0 : intakeId.termName,
+        previousCourseName,
+    };
+    // Step 4: Send email notification
+    try {
+        yield (0, sendEmailUpdateCourse_1.sendEmailUpdateCourse)(emailData.studentEmail, "course-change", "Your Application Details Have Been Updated", emailData.studentName, emailData.studentEmail, emailData.courseName, emailData.termName, previousCourseName);
+    }
+    catch (emailError) {
+        console.warn("Failed to send update email:", emailError);
+    }
+    try {
+        yield (0, sendEmailAdminCourse_1.sendEmailAdminCourse)("admissions@watneycollege.co.uk", "course-change-admin", "Student Application Course Updated", emailData.studentName, emailData.studentEmail, emailData.courseName, emailData.termName, emailData.previousCourseName);
+    }
+    catch (adminEmailError) {
+        console.warn("Failed to send admin notification email:", adminEmailError);
+    }
+    return updatedApplicationCourse;
 });
 const createApplicationCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b, _c, _d, _e, _f, _g, _h;
+    var _b, _c, _d, _e, _f, _g, _h, _j;
     const { courseId, intakeId, studentId } = payload;
     // Ensure all required fields are provided
     if (!courseId || !intakeId || !studentId) {
@@ -160,18 +211,18 @@ const createApplicationCourseIntoDB = (payload) => __awaiter(void 0, void 0, voi
     if (!populatedResult) {
         throw new Error("Failed to populate course application");
     }
-    const title = (_a = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.courseId) === null || _a === void 0 ? void 0 : _a.name;
-    const applicantName = (_b = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _b === void 0 ? void 0 : _b.name;
-    const applicantEmail = (_c = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _c === void 0 ? void 0 : _c.email;
+    const title = (_b = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.courseId) === null || _b === void 0 ? void 0 : _b.name;
+    const applicantName = (_c = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _c === void 0 ? void 0 : _c.name;
+    const applicantEmail = (_d = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _d === void 0 ? void 0 : _d.email;
     const adminSubject = `New Enrollment Submission for ${title}`;
     const emailSubject = `Thank You for Applying to Watney College`;
     const otp = "";
-    const termName = (_d = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.intakeId) === null || _d === void 0 ? void 0 : _d.termName;
-    const studentType = (_e = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _e === void 0 ? void 0 : _e.studentType;
-    const phone = (_f = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _f === void 0 ? void 0 : _f.phone;
-    const countryOfResidence = (_g = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _g === void 0 ? void 0 : _g.countryOfResidence;
+    const termName = (_e = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.intakeId) === null || _e === void 0 ? void 0 : _e.termName;
+    const studentType = (_f = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _f === void 0 ? void 0 : _f.studentType;
+    const phone = (_g = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _g === void 0 ? void 0 : _g.phone;
+    const countryOfResidence = (_h = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _h === void 0 ? void 0 : _h.countryOfResidence;
     const studentStatus = studentType === "eu" ? "Home Student" : "International Student";
-    const dob = (_h = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _h === void 0 ? void 0 : _h.dateOfBirth;
+    const dob = (_j = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _j === void 0 ? void 0 : _j.dateOfBirth;
     const formattedDob = dob ? (0, moment_1.default)(dob).format("DD MMM, YYYY") : "N/A";
     yield (0, sendEmail_1.sendEmail)(applicantEmail, "course-register", emailSubject, applicantName, otp, title);
     yield (0, sendEmail_1.sendEmail)("admission@watneycollege.co.uk", "course-register-admin", adminSubject, applicantName, otp, title, applicantEmail, termName, studentStatus, phone, countryOfResidence, formattedDob);
