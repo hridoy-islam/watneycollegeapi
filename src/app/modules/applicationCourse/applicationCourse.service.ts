@@ -156,41 +156,40 @@ const updateApplicationCourseIntoDB = async (
   id: string,
   payload: Partial<TApplicationCourse>
 ) => {
-  // Step 1: Fetch the current application course with populated data
+  // Step 1: Fetch the current course with populations
   const applicationCourse = await ApplicationCourse.findById(id)
-    .populate("courseId", "name") // assuming courseId refs a Course model with 'name'
-    .populate("intakeId", "termName") // assuming intakeId refs an Intake model with 'termName'
-    .populate("studentId", "name email phone"); // assuming studentId refs a Student model
+    .populate("courseId", "name")
+    .populate("intakeId", "termName")
+    .populate("studentId", "name email phone");
 
   if (!applicationCourse) {
     throw new AppError(httpStatus.NOT_FOUND, "ApplicationCourse not found");
   }
 
+  const previousCourseId = applicationCourse.courseId?._id?.toString?.();
   const previousCourseName = (applicationCourse.courseId as any)?.name || "";
 
-  // Step 2: Perform the update
-  const updatedApplicationCourse = await ApplicationCourse.findByIdAndUpdate(
-    id,
-    payload,
-    {
-      new: true,
-      runValidators: true,
-    }
-  )
-    .populate("courseId", "name")
-    .populate("intakeId", "termName")
-    .populate("studentId", "name email phone");
-
-  if (!updatedApplicationCourse) {
-    throw new AppError(
-      httpStatus.INTERNAL_SERVER_ERROR,
-      "Failed to update ApplicationCourse"
-    );
+  // Step 2: Apply updates
+  if (payload.courseId && payload.courseId.toString() !== previousCourseId) {
+    // courseId changed → generate new refId
+    const newRefId = await generateRefId(payload.courseId.toString());
+    payload.refId = newRefId;
   }
 
-  // Step 3: Extract data for email
-  const { studentId, courseId, intakeId } = updatedApplicationCourse;
+  // Merge updates into the doc
+  Object.assign(applicationCourse, payload);
+  await applicationCourse.save();
 
+  // Re-populate to get fresh course/intake/student data
+  await applicationCourse.populate([
+    { path: "courseId", select: "name" },
+    { path: "intakeId", select: "termName" },
+    { path: "studentId", select: "name email phone" },
+  ]);
+
+  const { studentId, courseId, intakeId } = applicationCourse;
+
+  // Step 3: Prepare email data
   const emailData = {
     studentName: (studentId as any)?.name,
     studentEmail: (studentId as any)?.email,
@@ -199,7 +198,7 @@ const updateApplicationCourseIntoDB = async (
     previousCourseName,
   };
 
-  // Step 4: Send email notification
+  // Step 4: Send emails
   try {
     await sendEmailUpdateCourse(
       emailData.studentEmail,
@@ -209,10 +208,10 @@ const updateApplicationCourseIntoDB = async (
       emailData.studentEmail,
       emailData.courseName,
       emailData.termName,
-      previousCourseName
+      emailData.previousCourseName
     );
-  } catch (emailError) {
-    console.warn("Failed to send update email:", emailError);
+  } catch (err) {
+    console.warn("Failed to send update email:", err);
   }
 
   try {
@@ -224,13 +223,14 @@ const updateApplicationCourseIntoDB = async (
       emailData.studentEmail,
       emailData.courseName,
       emailData.termName,
-      emailData.previousCourseName,
+      emailData.previousCourseName
     );
-  } catch (adminEmailError) {
-    console.warn("Failed to send admin notification email:", adminEmailError);
+  } catch (err) {
+    console.warn("Failed to send admin email:", err);
   }
 
-  return updatedApplicationCourse;
+  // ✅ Return updated doc
+  return applicationCourse;
 };
 
 const createApplicationCourseIntoDB = async (
