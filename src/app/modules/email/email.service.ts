@@ -13,6 +13,7 @@ import moment from "moment";
 import Course from "../course/course.model";
 
 import Signature from "../signature/signature.model";
+import { ApplicationCourse } from "../applicationCourse/applicationCourse.model";
 
 // const createEmailIntoDB = async (payload: any) => {
 //   try {
