@@ -11,7 +11,7 @@ import { User } from "../user/user.model";
 
 import moment from "moment";
 import Course from "../course/course.model";
-import { ApplicationCourse } from "../applicationCourse/applicationCourse.model";
+
 import Signature from "../signature/signature.model";
 
 // const createEmailIntoDB = async (payload: any) => {

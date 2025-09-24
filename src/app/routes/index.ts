@@ -7,11 +7,12 @@ import { UploadDocumentRoutes } from "../modules/documents/documents.route";
 import { JobApplicationRoutes } from "../modules/jobApplications/jobApplication.route";
 import { TermRoutes } from "../modules/term/term.route";
 import { CourseRoutes } from "../modules/course/course.route";
-import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
 import { JobRoutes } from "../modules/job/job.route";
 import { EmailDraftRoutes } from "../modules/email-drafts/email-drafts.route";
 import { EmailRoutes } from "../modules/email/email.route";
 import { SignatureRoutes } from "../modules/signature/signature.route";
+import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
+import { AssignmentRoutes } from "../modules/assignment/assignment.route";
 
 const router = Router();
 
@@ -66,6 +67,10 @@ const moduleRoutes = [
   {
     path: "/signature",
     route: SignatureRoutes,
+  },
+  {
+    path: "/assignment",
+    route: AssignmentRoutes,
   },
  
 ];
