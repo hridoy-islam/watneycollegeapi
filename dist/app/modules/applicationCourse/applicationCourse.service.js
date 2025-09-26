@@ -138,29 +138,34 @@ const getSingleApplicationCourseFromDB = (id) => __awaiter(void 0, void 0, void 
 //   return result;
 // };
 const updateApplicationCourseIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
-    // Step 1: Fetch the current application course with populated data
+    var _a, _b, _c, _d;
+    // Step 1: Fetch the current course with populations
     const applicationCourse = yield applicationCourse_model_1.ApplicationCourse.findById(id)
-        .populate("courseId", "name") // assuming courseId refs a Course model with 'name'
-        .populate("intakeId", "termName") // assuming intakeId refs an Intake model with 'termName'
-        .populate("studentId", "name email phone"); // assuming studentId refs a Student model
-    if (!applicationCourse) {
-        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "ApplicationCourse not found");
-    }
-    const previousCourseName = ((_a = applicationCourse.courseId) === null || _a === void 0 ? void 0 : _a.name) || "";
-    // Step 2: Perform the update
-    const updatedApplicationCourse = yield applicationCourse_model_1.ApplicationCourse.findByIdAndUpdate(id, payload, {
-        new: true,
-        runValidators: true,
-    })
         .populate("courseId", "name")
         .populate("intakeId", "termName")
         .populate("studentId", "name email phone");
-    if (!updatedApplicationCourse) {
-        throw new AppError_1.default(http_status_1.default.INTERNAL_SERVER_ERROR, "Failed to update ApplicationCourse");
+    if (!applicationCourse) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "ApplicationCourse not found");
     }
-    // Step 3: Extract data for email
-    const { studentId, courseId, intakeId } = updatedApplicationCourse;
+    const previousCourseId = (_c = (_b = (_a = applicationCourse.courseId) === null || _a === void 0 ? void 0 : _a._id) === null || _b === void 0 ? void 0 : _b.toString) === null || _c === void 0 ? void 0 : _c.call(_b);
+    const previousCourseName = ((_d = applicationCourse.courseId) === null || _d === void 0 ? void 0 : _d.name) || "";
+    // Step 2: Apply updates
+    if (payload.courseId && payload.courseId.toString() !== previousCourseId) {
+        // courseId changed → generate new refId
+        const newRefId = yield generateRefId(payload.courseId.toString());
+        payload.refId = newRefId;
+    }
+    // Merge updates into the doc
+    Object.assign(applicationCourse, payload);
+    yield applicationCourse.save();
+    // Re-populate to get fresh course/intake/student data
+    yield applicationCourse.populate([
+        { path: "courseId", select: "name" },
+        { path: "intakeId", select: "termName" },
+        { path: "studentId", select: "name email phone" },
+    ]);
+    const { studentId, courseId, intakeId } = applicationCourse;
+    // Step 3: Prepare email data
     const emailData = {
         studentName: studentId === null || studentId === void 0 ? void 0 : studentId.name,
         studentEmail: studentId === null || studentId === void 0 ? void 0 : studentId.email,
@@ -168,23 +173,24 @@ const updateApplicationCourseIntoDB = (id, payload) => __awaiter(void 0, void 0,
         termName: intakeId === null || intakeId === void 0 ? void 0 : intakeId.termName,
         previousCourseName,
     };
-    // Step 4: Send email notification
+    // Step 4: Send emails
     try {
-        yield (0, sendEmailUpdateCourse_1.sendEmailUpdateCourse)(emailData.studentEmail, "course-change", "Your Application Details Have Been Updated", emailData.studentName, emailData.studentEmail, emailData.courseName, emailData.termName, previousCourseName);
+        yield (0, sendEmailUpdateCourse_1.sendEmailUpdateCourse)(emailData.studentEmail, "course-change", "Your Application Details Have Been Updated", emailData.studentName, emailData.studentEmail, emailData.courseName, emailData.termName, emailData.previousCourseName);
     }
-    catch (emailError) {
-        console.warn("Failed to send update email:", emailError);
+    catch (err) {
+        console.warn("Failed to send update email:", err);
     }
     try {
         yield (0, sendEmailAdminCourse_1.sendEmailAdminCourse)("admissions@watneycollege.co.uk", "course-change-admin", "Student Application Course Updated", emailData.studentName, emailData.studentEmail, emailData.courseName, emailData.termName, emailData.previousCourseName);
     }
-    catch (adminEmailError) {
-        console.warn("Failed to send admin notification email:", adminEmailError);
+    catch (err) {
+        console.warn("Failed to send admin email:", err);
     }
-    return updatedApplicationCourse;
+    // ✅ Return updated doc
+    return applicationCourse;
 });
 const createApplicationCourseIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    var _b, _c, _d, _e, _f, _g, _h, _j;
+    var _e, _f, _g, _h, _j, _k, _l, _m;
     const { courseId, intakeId, studentId } = payload;
     // Ensure all required fields are provided
     if (!courseId || !intakeId || !studentId) {
@@ -211,18 +217,18 @@ const createApplicationCourseIntoDB = (payload) => __awaiter(void 0, void 0, voi
     if (!populatedResult) {
         throw new Error("Failed to populate course application");
     }
-    const title = (_b = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.courseId) === null || _b === void 0 ? void 0 : _b.name;
-    const applicantName = (_c = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _c === void 0 ? void 0 : _c.name;
-    const applicantEmail = (_d = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _d === void 0 ? void 0 : _d.email;
+    const title = (_e = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.courseId) === null || _e === void 0 ? void 0 : _e.name;
+    const applicantName = (_f = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _f === void 0 ? void 0 : _f.name;
+    const applicantEmail = (_g = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _g === void 0 ? void 0 : _g.email;
     const adminSubject = `New Enrollment Submission for ${title}`;
     const emailSubject = `Thank You for Applying to Watney College`;
     const otp = "";
-    const termName = (_e = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.intakeId) === null || _e === void 0 ? void 0 : _e.termName;
-    const studentType = (_f = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _f === void 0 ? void 0 : _f.studentType;
-    const phone = (_g = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _g === void 0 ? void 0 : _g.phone;
-    const countryOfResidence = (_h = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _h === void 0 ? void 0 : _h.countryOfResidence;
+    const termName = (_h = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.intakeId) === null || _h === void 0 ? void 0 : _h.termName;
+    const studentType = (_j = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _j === void 0 ? void 0 : _j.studentType;
+    const phone = (_k = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _k === void 0 ? void 0 : _k.phone;
+    const countryOfResidence = (_l = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _l === void 0 ? void 0 : _l.countryOfResidence;
     const studentStatus = studentType === "eu" ? "Home Student" : "International Student";
-    const dob = (_j = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _j === void 0 ? void 0 : _j.dateOfBirth;
+    const dob = (_m = populatedResult === null || populatedResult === void 0 ? void 0 : populatedResult.studentId) === null || _m === void 0 ? void 0 : _m.dateOfBirth;
     const formattedDob = dob ? (0, moment_1.default)(dob).format("DD MMM, YYYY") : "N/A";
     yield (0, sendEmail_1.sendEmail)(applicantEmail, "course-register", emailSubject, applicantName, otp, title);
     yield (0, sendEmail_1.sendEmail)("admission@watneycollege.co.uk", "course-register-admin", adminSubject, applicantName, otp, title, applicantEmail, termName, studentStatus, phone, countryOfResidence, formattedDob);

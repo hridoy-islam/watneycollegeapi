@@ -22,8 +22,8 @@ const sendEmailManual_1 = require("../../utils/sendEmailManual");
 const user_model_1 = require("../user/user.model");
 const moment_1 = __importDefault(require("moment"));
 const course_model_1 = __importDefault(require("../course/course.model"));
-const applicationCourse_model_1 = require("../applicationCourse/applicationCourse.model");
 const signature_model_1 = __importDefault(require("../signature/signature.model"));
+const applicationCourse_model_1 = require("../applicationCourse/applicationCourse.model");
 // const createEmailIntoDB = async (payload: any) => {
 //   try {
 //     const {

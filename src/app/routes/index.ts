@@ -13,6 +13,7 @@ import { EmailRoutes } from "../modules/email/email.route";
 import { SignatureRoutes } from "../modules/signature/signature.route";
 import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
 import { AssignmentRoutes } from "../modules/assignment/assignment.route";
+import { CourseUnitRoutes } from "../modules/courseUnit/courseUnit.route";
 
 const router = Router();
 
@@ -71,6 +72,10 @@ const moduleRoutes = [
   {
     path: "/assignment",
     route: AssignmentRoutes,
+  },
+  {
+    path: "/course-unit",
+    route: CourseUnitRoutes,
   },
  
 ];

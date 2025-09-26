@@ -8,11 +8,13 @@ const documents_route_1 = require("../modules/documents/documents.route");
 const jobApplication_route_1 = require("../modules/jobApplications/jobApplication.route");
 const term_route_1 = require("../modules/term/term.route");
 const course_route_1 = require("../modules/course/course.route");
-const applicationCourse_route_1 = require("../modules/applicationCourse/applicationCourse.route");
 const job_route_1 = require("../modules/job/job.route");
 const email_drafts_route_1 = require("../modules/email-drafts/email-drafts.route");
 const email_route_1 = require("../modules/email/email.route");
 const signature_route_1 = require("../modules/signature/signature.route");
+const applicationCourse_route_1 = require("../modules/applicationCourse/applicationCourse.route");
+const assignment_route_1 = require("../modules/assignment/assignment.route");
+const courseUnit_route_1 = require("../modules/courseUnit/courseUnit.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -62,6 +64,14 @@ const moduleRoutes = [
     {
         path: "/signature",
         route: signature_route_1.SignatureRoutes,
+    },
+    {
+        path: "/assignment",
+        route: assignment_route_1.AssignmentRoutes,
+    },
+    {
+        path: "/course-unit",
+        route: courseUnit_route_1.CourseUnitRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
