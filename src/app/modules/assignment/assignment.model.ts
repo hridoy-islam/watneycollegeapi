@@ -6,9 +6,11 @@ import { TAssignment } from "./assignment.interface";
 const AssignmentSchema = new Schema<TAssignment>(
   {
     applicationId: { type: Schema.Types.ObjectId, ref: "ApplicationCourse" },
-    studentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    unitId:{type: Schema.Types.ObjectId, ref: "CourseUnit"},
+    studentId: { type: Schema.Types.ObjectId, ref: "User"},
     assignmentName:{type: String},
-    document:{type:String}
+    document:{type:String},
+    
   },
   {
     timestamps: true,

@@ -14,6 +14,8 @@ import { SignatureRoutes } from "../modules/signature/signature.route";
 import { ApplicationCourseRoutes } from "../modules/applicationCourse/applicationCourse.route";
 import { AssignmentRoutes } from "../modules/assignment/assignment.route";
 import { CourseUnitRoutes } from "../modules/courseUnit/courseUnit.route";
+import { CourseUnitMaterial } from "../modules/courseUnitMaterial/courseUnitMaterial.model";
+import { CourseUnitMaterialRoutes } from "../modules/courseUnitMaterial/courseUnitMaterial.route";
 
 const router = Router();
 
@@ -76,6 +78,10 @@ const moduleRoutes = [
   {
     path: "/course-unit",
     route: CourseUnitRoutes,
+  },
+  {
+    path: "/unit-material",
+    route: CourseUnitMaterialRoutes,
   },
  
 ];

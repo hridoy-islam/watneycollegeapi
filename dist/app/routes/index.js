@@ -15,6 +15,7 @@ const signature_route_1 = require("../modules/signature/signature.route");
 const applicationCourse_route_1 = require("../modules/applicationCourse/applicationCourse.route");
 const assignment_route_1 = require("../modules/assignment/assignment.route");
 const courseUnit_route_1 = require("../modules/courseUnit/courseUnit.route");
+const courseUnitMaterial_route_1 = require("../modules/courseUnitMaterial/courseUnitMaterial.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -72,6 +73,10 @@ const moduleRoutes = [
     {
         path: "/course-unit",
         route: courseUnit_route_1.CourseUnitRoutes,
+    },
+    {
+        path: "/unit-material",
+        route: courseUnitMaterial_route_1.CourseUnitMaterialRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

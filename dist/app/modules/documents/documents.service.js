@@ -78,6 +78,9 @@ const UploadDocumentToGCS = (file, payload) => __awaiter(void 0, void 0, void 0,
         else if (file_type === "signatureDoc") {
             return { entityId, file_type, fileUrl };
         }
+        else {
+            return { entityId, file_type, fileUrl };
+        }
     }
     catch (error) {
         console.error("File upload failed:", error);

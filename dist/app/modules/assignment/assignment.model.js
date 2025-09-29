@@ -4,9 +4,10 @@ exports.Assignment = void 0;
 const mongoose_1 = require("mongoose");
 const AssignmentSchema = new mongoose_1.Schema({
     applicationId: { type: mongoose_1.Schema.Types.ObjectId, ref: "ApplicationCourse" },
-    studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    unitId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnit" },
+    studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User" },
     assignmentName: { type: String },
-    document: { type: String }
+    document: { type: String },
 }, {
     timestamps: true,
 });
