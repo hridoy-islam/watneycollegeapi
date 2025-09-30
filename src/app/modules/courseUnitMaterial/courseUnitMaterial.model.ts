@@ -28,7 +28,7 @@ const CourseUnitMaterialSchema = new Schema<TCourseUnitMaterial>(
   {
     courseId: { type: Schema.Types.ObjectId, ref: "Course", required: true },
     unitId: { type: Schema.Types.ObjectId, ref: "CourseUnit", required: true },
-    introduction: { type: ResourceSchema, required: true },
+    introduction: { type: ResourceSchema, },
     studyGuides: { type: [ResourceSchema], default: [] },
     lectures: { type: [ResourceSchema], default: [] },
     learningOutcomes: { type: [ResourceSchema], default: [] },
