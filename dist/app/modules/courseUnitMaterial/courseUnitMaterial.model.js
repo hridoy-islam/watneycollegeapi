@@ -26,7 +26,7 @@ const ResourceSchema = new mongoose_1.Schema({
 const CourseUnitMaterialSchema = new mongoose_1.Schema({
     courseId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Course", required: true },
     unitId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnit", required: true },
-    introduction: { type: ResourceSchema, required: true },
+    introduction: { type: ResourceSchema, },
     studyGuides: { type: [ResourceSchema], default: [] },
     lectures: { type: [ResourceSchema], default: [] },
     learningOutcomes: { type: [ResourceSchema], default: [] },

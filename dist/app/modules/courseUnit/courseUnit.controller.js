@@ -46,6 +46,16 @@ const updateCourseUnit = (0, catchAsync_1.default)((req, res) => __awaiter(void 
         data: result,
     });
 }));
+const deleteCourseUnit = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield courseUnit_service_1.CourseUnitServices.deleteCourseUnitIntoDB(id);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "CourseUnit is deleted succesfully",
+        data: result,
+    });
+}));
 const createCourseUnit = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield courseUnit_service_1.CourseUnitServices.createCourseUnitIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
@@ -59,5 +69,6 @@ exports.CourseUnitControllers = {
     getAllCourseUnit,
     getSingleCourseUnit,
     updateCourseUnit,
-    createCourseUnit
+    createCourseUnit,
+    deleteCourseUnit
 };

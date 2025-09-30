@@ -18,10 +18,11 @@ const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const courseUnit_model_1 = require("./courseUnit.model");
 const courseUnit_constant_1 = require("./courseUnit.constant");
+const courseUnitMaterial_model_1 = require("../courseUnitMaterial/courseUnitMaterial.model");
 const getAllCourseUnitFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const CourseUnitQuery = new QueryBuilder_1.default(courseUnit_model_1.CourseUnit.find().populate({
-        path: 'courseId',
-        select: 'name',
+        path: "courseId",
+        select: "name",
     }), query)
         .search(courseUnit_constant_1.CourseUnitSearchableFields)
         .filter(query)
@@ -37,8 +38,8 @@ const getAllCourseUnitFromDB = (query) => __awaiter(void 0, void 0, void 0, func
 });
 const getSingleCourseUnitFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const result = yield courseUnit_model_1.CourseUnit.findById(id).populate({
-        path: 'courseId',
-        select: 'name',
+        path: "courseId",
+        select: "name",
     });
     return result;
 });
@@ -57,9 +58,20 @@ const createCourseUnitIntoDB = (payload) => __awaiter(void 0, void 0, void 0, fu
     const result = yield courseUnit_model_1.CourseUnit.create(payload);
     return result;
 });
+const deleteCourseUnitIntoDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
+    const courseUnit = yield courseUnit_model_1.CourseUnit.findById(id);
+    if (!courseUnit) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "CourseUnit not found");
+    }
+    yield courseUnitMaterial_model_1.CourseUnitMaterial.deleteMany({ unitId: id });
+    // Delete the course unit itself
+    const result = yield courseUnit_model_1.CourseUnit.findByIdAndDelete(id);
+    return result;
+});
 exports.CourseUnitServices = {
     getAllCourseUnitFromDB,
     getSingleCourseUnitFromDB,
     updateCourseUnitIntoDB,
-    createCourseUnitIntoDB
+    createCourseUnitIntoDB,
+    deleteCourseUnitIntoDB
 };

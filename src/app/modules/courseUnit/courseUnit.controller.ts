@@ -34,6 +34,16 @@ const updateCourseUnit = catchAsync(async (req, res) => {
     data: result,
   });
 });
+const deleteCourseUnit = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const result = await CourseUnitServices.deleteCourseUnitIntoDB(id);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "CourseUnit is deleted succesfully",
+    data: result,
+  });
+});
 
 const createCourseUnit: RequestHandler = catchAsync(async (req, res) => {
   const result = await CourseUnitServices.createCourseUnitIntoDB(req.body);
@@ -50,6 +60,7 @@ export const CourseUnitControllers = {
   getAllCourseUnit,
   getSingleCourseUnit,
   updateCourseUnit,
-  createCourseUnit
+  createCourseUnit,
+  deleteCourseUnit
   
 };

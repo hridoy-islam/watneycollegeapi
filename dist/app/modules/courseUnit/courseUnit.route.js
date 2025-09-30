@@ -12,4 +12,5 @@ router.get("/", courseUnit_controller_1.CourseUnitControllers.getAllCourseUnit);
 router.post("/", courseUnit_controller_1.CourseUnitControllers.createCourseUnit);
 router.get("/:id", courseUnit_controller_1.CourseUnitControllers.getSingleCourseUnit);
 router.patch("/:id", courseUnit_controller_1.CourseUnitControllers.updateCourseUnit);
+router.delete("/:id", courseUnit_controller_1.CourseUnitControllers.deleteCourseUnit);
 exports.CourseUnitRoutes = router;

@@ -22,6 +22,10 @@ router.patch(
   "/:id",
   CourseUnitControllers.updateCourseUnit
 );
+router.delete(
+  "/:id",
+  CourseUnitControllers.deleteCourseUnit
+);
 
 
 export const CourseUnitRoutes = router;
