@@ -19,10 +19,31 @@ const AppError_1 = __importDefault(require("../../errors/AppError"));
 const assignment_model_1 = require("./assignment.model");
 const assignment_constant_1 = require("./assignment.constant");
 const getAllAssignmentFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const AssignmentQuery = new QueryBuilder_1.default(assignment_model_1.Assignment.find().populate({
-        path: "studentId",
-        select: "firstName title initial lastName"
-    }), query)
+    const AssignmentQuery = new QueryBuilder_1.default(assignment_model_1.Assignment.find().populate([
+        {
+            path: "studentId",
+            select: "firstName title initial lastName name email",
+        },
+        {
+            path: "submissions.submitBy",
+            select: "firstName lastName name email role", // populate student details
+        },
+        {
+            path: "feedbacks.submitBy",
+            select: "firstName lastName name email role", // populate teacher/admin details
+        },
+        {
+            path: "applicationId",
+            populate: {
+                path: "courseId",
+                select: "name", // get only course name
+            },
+        },
+        {
+            path: "unitId",
+            select: "title", // get only unit title
+        },
+    ]), query)
         .search(assignment_constant_1.AssignmentSearchableFields)
         .filter(query)
         .sort()
@@ -58,5 +79,5 @@ exports.AssignmentServices = {
     getAllAssignmentFromDB,
     getSingleAssignmentFromDB,
     updateAssignmentIntoDB,
-    createAssignmentIntoDB
+    createAssignmentIntoDB,
 };

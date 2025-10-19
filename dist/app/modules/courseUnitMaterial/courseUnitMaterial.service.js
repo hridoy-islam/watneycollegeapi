@@ -19,7 +19,7 @@ const AppError_1 = __importDefault(require("../../errors/AppError"));
 const courseUnitMaterial_model_1 = require("./courseUnitMaterial.model");
 const courseUnitMaterial_constant_1 = require("./courseUnitMaterial.constant");
 const getAllCourseUnitMaterialFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const CourseUnitMaterialQuery = new QueryBuilder_1.default(courseUnitMaterial_model_1.CourseUnitMaterial.find(), query)
+    const CourseUnitMaterialQuery = new QueryBuilder_1.default(courseUnitMaterial_model_1.CourseUnitMaterial.find().populate('unitId'), query)
         .search(courseUnitMaterial_constant_1.CourseUnitMaterialSearchableFields)
         .filter(query)
         .sort()

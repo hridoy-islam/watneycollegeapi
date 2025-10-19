@@ -16,6 +16,7 @@ import { AssignmentRoutes } from "../modules/assignment/assignment.route";
 import { CourseUnitRoutes } from "../modules/courseUnit/courseUnit.route";
 import { CourseUnitMaterial } from "../modules/courseUnitMaterial/courseUnitMaterial.model";
 import { CourseUnitMaterialRoutes } from "../modules/courseUnitMaterial/courseUnitMaterial.route";
+import { CourseDocumentRoutes } from "../modules/courseDocument/courseDocument.route";
 
 const router = Router();
 
@@ -82,6 +83,10 @@ const moduleRoutes = [
   {
     path: "/unit-material",
     route: CourseUnitMaterialRoutes,
+  },
+    {
+    path: "/course-document",
+    route: CourseDocumentRoutes,
   },
  
 ];

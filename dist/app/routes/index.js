@@ -16,6 +16,7 @@ const applicationCourse_route_1 = require("../modules/applicationCourse/applicat
 const assignment_route_1 = require("../modules/assignment/assignment.route");
 const courseUnit_route_1 = require("../modules/courseUnit/courseUnit.route");
 const courseUnitMaterial_route_1 = require("../modules/courseUnitMaterial/courseUnitMaterial.route");
+const courseDocument_route_1 = require("../modules/courseDocument/courseDocument.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -77,6 +78,10 @@ const moduleRoutes = [
     {
         path: "/unit-material",
         route: courseUnitMaterial_route_1.CourseUnitMaterialRoutes,
+    },
+    {
+        path: "/course-document",
+        route: courseDocument_route_1.CourseDocumentRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

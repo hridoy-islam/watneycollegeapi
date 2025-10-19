@@ -6,7 +6,7 @@ import { TCourseUnitMaterial } from "./courseUnitMaterial.interface";
 import { CourseUnitMaterialSearchableFields } from "./courseUnitMaterial.constant";
 
 const getAllCourseUnitMaterialFromDB = async (query: Record<string, unknown>) => {
-  const CourseUnitMaterialQuery = new QueryBuilder(CourseUnitMaterial.find(), query)
+  const CourseUnitMaterialQuery = new QueryBuilder(CourseUnitMaterial.find().populate('unitId'), query)
     .search(CourseUnitMaterialSearchableFields)
     .filter(query)
     .sort()
