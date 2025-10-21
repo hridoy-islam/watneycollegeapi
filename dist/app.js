@@ -35,9 +35,9 @@ pusher.trigger("my-channel", "my-event", {
     message: "hello world",
 });
 //parsers
-app.use(express_1.default.json());
+app.use(express_1.default.json({ limit: "50mb" }));
 app.use((0, cookie_parser_1.default)());
-app.use(express_1.default.urlencoded({ extended: true }));
+app.use(express_1.default.urlencoded({ extended: true, limit: "50mb" }));
 app.use("/uploads", express_1.default.static("uploads"));
 // app.use((req, res, next) => {
 //   // Set the Access-Control-Allow-Origin header to allow requests from any origin

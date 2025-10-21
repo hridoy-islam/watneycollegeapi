@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -23,6 +34,7 @@ const moment_1 = __importDefault(require("moment"));
 const course_model_1 = __importDefault(require("../course/course.model"));
 const sendEmailUpdateCourse_1 = require("../../utils/sendEmailUpdateCourse");
 const sendEmailAdminCourse_1 = require("../../utils/sendEmailAdminCourse");
+const user_model_1 = require("../user/user.model");
 // const generateRefId = async (courseId: string): Promise<string> => {
 //   const course = await Course.findById(courseId).select("courseCode");
 //   if (!course || !course.courseCode) {
@@ -94,20 +106,136 @@ const generateRefId = (courseId) => __awaiter(void 0, void 0, void 0, function* 
     return refId;
 });
 const getAllApplicationCourseFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
-    const ApplicationCourseQuery = new QueryBuilder_1.default(applicationCourse_model_1.ApplicationCourse.find()
-        .populate({
-        path: "studentId",
-        select: "title firstName initial lastName email phone studentType",
-    })
-        .populate("intakeId")
-        .populate("courseId"), query)
-        .search(applicationCourse_constant_1.ApplicationCourseSearchableFields)
-        .filter(query)
-        .sort()
-        .paginate()
-        .fields();
-    const meta = yield ApplicationCourseQuery.countTotal();
-    const result = yield ApplicationCourseQuery.modelQuery;
+    const { searchTerm } = query, otherQueryParams = __rest(query, ["searchTerm"]);
+    let studentIds = [];
+    // If searchTerm is provided, search in User model first
+    if (searchTerm) {
+        // Create search conditions for different name combinations
+        const nameSearchConditions = [];
+        // Split search term into parts for name combination searches
+        const searchTerms = String(searchTerm).trim().split(/\s+/);
+        if (searchTerms.length === 1) {
+            // Single term - search in individual fields
+            const term = searchTerms[0];
+            nameSearchConditions.push({ email: { $regex: term, $options: "i" } }, { firstName: { $regex: term, $options: "i" } }, { lastName: { $regex: term, $options: "i" } }, { title: { $regex: term, $options: "i" } }, { initial: { $regex: term, $options: "i" } }, { name: { $regex: term, $options: "i" } });
+        }
+        else if (searchTerms.length === 2) {
+            // Two terms - could be "firstName lastName", "title firstName", etc.
+            const [first, second] = searchTerms;
+            // Try different combinations
+            nameSearchConditions.push(
+            // firstName + lastName
+            {
+                $and: [
+                    { firstName: { $regex: first, $options: "i" } },
+                    { lastName: { $regex: second, $options: "i" } }
+                ]
+            }, 
+            // title + firstName
+            {
+                $and: [
+                    { title: { $regex: first, $options: "i" } },
+                    { firstName: { $regex: second, $options: "i" } }
+                ]
+            }, 
+            // firstName + initial
+            {
+                $and: [
+                    { firstName: { $regex: first, $options: "i" } },
+                    { initial: { $regex: second, $options: "i" } }
+                ]
+            });
+        }
+        else if (searchTerms.length === 3) {
+            // Three terms - could be "title firstName lastName", "firstName initial lastName", etc.
+            const [first, second, third] = searchTerms;
+            nameSearchConditions.push(
+            // title + firstName + lastName
+            {
+                $and: [
+                    { title: { $regex: first, $options: "i" } },
+                    { firstName: { $regex: second, $options: "i" } },
+                    { lastName: { $regex: third, $options: "i" } }
+                ]
+            }, 
+            // firstName + initial + lastName
+            {
+                $and: [
+                    { firstName: { $regex: first, $options: "i" } },
+                    { initial: { $regex: second, $options: "i" } },
+                    { lastName: { $regex: third, $options: "i" } }
+                ]
+            });
+        }
+        else if (searchTerms.length >= 4) {
+            // Four or more terms - try title + firstName + initial + lastName combination
+            const [first, second, third, fourth] = searchTerms;
+            nameSearchConditions.push({
+                $and: [
+                    { title: { $regex: first, $options: "i" } },
+                    { firstName: { $regex: second, $options: "i" } },
+                    { initial: { $regex: third, $options: "i" } },
+                    { lastName: { $regex: fourth, $options: "i" } }
+                ]
+            });
+        }
+        // Also search for the original full search term in individual fields
+        nameSearchConditions.push({ email: { $regex: searchTerm, $options: "i" } }, { firstName: { $regex: searchTerm, $options: "i" } }, { lastName: { $regex: searchTerm, $options: "i" } }, { title: { $regex: searchTerm, $options: "i" } }, { initial: { $regex: searchTerm, $options: "i" } }, { name: { $regex: searchTerm, $options: "i" } });
+        const userQuery = new QueryBuilder_1.default(user_model_1.User.find({
+            $or: nameSearchConditions
+        }), {}).fields();
+        const matchingUsers = yield userQuery.modelQuery;
+        studentIds = matchingUsers.map((user) => user._id);
+    }
+    // Build the main ApplicationCourse query
+    let applicationCourseQuery;
+    if (searchTerm && studentIds.length > 0) {
+        // If we have matching student IDs, search by studentId
+        applicationCourseQuery = new QueryBuilder_1.default(applicationCourse_model_1.ApplicationCourse.find({
+            studentId: { $in: studentIds },
+        })
+            .populate({
+            path: "studentId",
+            select: "title firstName initial lastName email phone studentType",
+        })
+            .populate("intakeId")
+            .populate("courseId"), otherQueryParams)
+            .filter(otherQueryParams)
+            .sort()
+            .paginate()
+            .fields();
+    }
+    else if (searchTerm && studentIds.length === 0) {
+        // If searchTerm provided but no matching users found, return empty result
+        applicationCourseQuery = new QueryBuilder_1.default(applicationCourse_model_1.ApplicationCourse.find({ _id: null }) // Force no results
+            .populate({
+            path: "studentId",
+            select: "title firstName initial lastName email phone studentType",
+        })
+            .populate("intakeId")
+            .populate("courseId"), otherQueryParams)
+            .filter(otherQueryParams)
+            .sort()
+            .paginate()
+            .fields();
+    }
+    else {
+        // Normal query without searchTerm
+        applicationCourseQuery = new QueryBuilder_1.default(applicationCourse_model_1.ApplicationCourse.find()
+            .populate({
+            path: "studentId",
+            select: "title firstName initial lastName email phone studentType",
+        })
+            .populate("intakeId")
+            .populate("courseId"), query)
+            .search(applicationCourse_constant_1.ApplicationCourseSearchableFields)
+            .filter(query)
+            .sort()
+            .paginate()
+            .fields();
+    }
+    const meta = yield applicationCourseQuery.countTotal();
+    const result = yield applicationCourseQuery.modelQuery;
     return {
         meta,
         result,
