@@ -31,6 +31,10 @@ const getAllAssignmentFromDB = async (query: Record<string, unknown>) => {
         path: "unitId",
         select: "title", // get only unit title
       },
+      {
+        path: "unitMaterialId",
+        select: "assignments", // populate only assignments from unit material
+      },
     ]),
     query
   )

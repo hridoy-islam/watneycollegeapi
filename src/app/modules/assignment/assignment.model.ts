@@ -34,9 +34,9 @@ const AssignmentSchema = new Schema<TAssignment>(
     applicationId: { type: Schema.Types.ObjectId, ref: "ApplicationCourse" },
     unitId: { type: Schema.Types.ObjectId, ref: "CourseUnit" },
     studentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-
-    assignmentName: { type: String, required: true },
-
+    unitMaterialId: { type: Schema.Types.ObjectId, ref: "CourseUnitMaterial",  },
+    // assignmentName: { type: String, required: true },
+    courseMaterialAssignmentId:{ type: String, required: true },
     // Array of submission attempts
     submissions: [SubmissionSchema],
     requireResubmit: { type: Boolean, default: false },

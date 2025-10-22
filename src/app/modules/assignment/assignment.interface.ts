@@ -24,7 +24,8 @@ export interface TAssignment {
   unitId?: Types.ObjectId;
   studentId: Types.ObjectId;
   assignmentName: string;
-
+  unitMaterialId:Types.ObjectId;
+  courseMaterialAssignmentId: string;
   submissions?: TSubmission[]; // All student submission attempts
   feedbacks?: TFeedback[]; // All teacher/admin feedback entries
   requireResubmit: boolean;
