@@ -6,7 +6,7 @@ import { User } from "./user.model";
 import AppError from "../../errors/AppError";
 
 const getAllUserFromDB = async (query: Record<string, unknown>) => {
-  const userQuery = new QueryBuilder(User.find().populate('assignCourses'), query)
+  const userQuery = new QueryBuilder(User.find(), query)
     .search(UserSearchableFields)
     .filter(query)
     .sort()
@@ -23,7 +23,7 @@ const getAllUserFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleUserFromDB = async (id: string) => {
-  const result = await User.findById(id).populate('assignCourses');
+  const result = await User.findById(id);
   return result;
 };
 
