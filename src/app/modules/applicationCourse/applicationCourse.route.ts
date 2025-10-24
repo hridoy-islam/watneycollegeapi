@@ -23,5 +23,10 @@ router.patch(
   ApplicationCourseControllers.updateApplicationCourse
 );
 
+router.get(
+  "/teacher/:id",
+  ApplicationCourseControllers.getAllTeacherStudentApplications
+);
+
 
 export const ApplicationCourseRoutes = router;

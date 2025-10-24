@@ -27,7 +27,7 @@ const createTeacherCourseIntoDB = async (payload: TTeacherCourse) => {
 };
 
 const getAllTeacherCourseFromDB = async (query: Record<string, unknown>) => {
-  const TeacherCourseQuery = new QueryBuilder(TeacherCourse.find().populate('courseId'), query)
+  const TeacherCourseQuery = new QueryBuilder(TeacherCourse.find().populate('courseId').populate('termId'), query)
     .search(TeacherCourseSearchableFields)
     .filter(query)
     .sort()

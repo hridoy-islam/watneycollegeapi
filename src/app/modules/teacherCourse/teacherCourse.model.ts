@@ -4,6 +4,7 @@ import { TTeacherCourse } from "./teacherCourse.interface";
 const TeacherCourseSchema = new Schema({
   courseId: { type: Schema.Types.ObjectId, ref: "Course", required: true },
   teacherId: { type: Schema.Types.ObjectId, ref: "User", required: true},
+  termId: { type: Schema.Types.ObjectId, ref: "Term", required: true},
 });
 
 // Apply the type at the model level

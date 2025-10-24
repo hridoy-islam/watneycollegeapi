@@ -88,7 +88,7 @@ const getTeacherAssignmentFeedbackFromDB = async (
 ) => {
   // 1️⃣ Get all course IDs assigned to the teacher
   const teacherCourses = await TeacherCourse.find({ teacherId }).select("courseId");
-  
+
   if (!teacherCourses || teacherCourses.length === 0) {
     return {
       meta: { page: 1, limit: 10, total: 0, totalPage: 0 },
@@ -98,16 +98,23 @@ const getTeacherAssignmentFeedbackFromDB = async (
 
   const courseIds = teacherCourses.map(tc => tc.courseId);
 
+  // Extract filters from query
+  const courseIdFilter = query.courseId ? String(query.courseId) : null;
+  const termIdFilter = query.termId ? String(query.termId) : null;
+
   // 2️⃣ Build the query for submitted assignments
   const AssignmentQuery = new QueryBuilder(
     Assignment.find({ status: "submitted" }).populate([
       { path: "studentId", select: "firstName title initial lastName name email" },
       { path: "submissions.submitBy", select: "firstName lastName name email role" },
       { path: "feedbacks.submitBy", select: "firstName lastName name email role" },
-      { 
+      {
         path: "applicationId",
         populate: { path: "courseId", select: "name" },
-        match: { courseId: { $in: courseIds } },
+        match: {
+          courseId: courseIdFilter ? courseIdFilter : { $in: courseIds },
+          ...(termIdFilter && { intakeId: termIdFilter }), // 🟢 filter by term (intake)
+        },
       },
       { path: "unitId", select: "title" },
       { path: "unitMaterialId", select: "assignments" },
@@ -129,10 +136,12 @@ const getTeacherAssignmentFeedbackFromDB = async (
   // 5️⃣ Handle limit and pagination properly
   const total = filteredResult.length;
   const page = Number(query.page) || 1;
-  const limitParam = query.limit === 'all' ? total : Number(query.limit) || 10;
+  const limitParam = query.limit === "all" ? total : Number(query.limit) || 10;
 
-  // Slice results if limit is not 'all'
-  const paginatedResult = query.limit === 'all' ? filteredResult : filteredResult.slice((page - 1) * limitParam, page * limitParam);
+  const paginatedResult =
+    query.limit === "all"
+      ? filteredResult
+      : filteredResult.slice((page - 1) * limitParam, page * limitParam);
 
   const totalPage = limitParam > 0 ? Math.ceil(total / limitParam) : 1;
 
@@ -140,6 +149,7 @@ const getTeacherAssignmentFeedbackFromDB = async (
 
   return { meta, result: paginatedResult };
 };
+
 
 
 

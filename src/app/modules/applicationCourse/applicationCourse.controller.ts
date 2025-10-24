@@ -46,10 +46,26 @@ const createApplicationCourse: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+
+const getAllTeacherStudentApplications: RequestHandler = catchAsync(async (req, res) => {
+
+  const teacherId = req.params.id;
+  const result = await ApplicationCourseServices.getAllTeacherStudentApplicationsFromDb(teacherId,req.query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "ApplicationCourse applications retrieved successfully",
+    data: result,
+  });
+});
+
+
 export const ApplicationCourseControllers = {
   getAllApplicationCourse,
   getSingleApplicationCourse,
   updateApplicationCourse,
-  createApplicationCourse
+  createApplicationCourse,
+  getAllTeacherStudentApplications
   
 };

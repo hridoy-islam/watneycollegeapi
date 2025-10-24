@@ -10,6 +10,7 @@ import Course from "../course/course.model";
 import { sendEmailUpdateCourse } from "../../utils/sendEmailUpdateCourse";
 import { sendEmailAdminCourse } from "../../utils/sendEmailAdminCourse";
 import { User } from "../user/user.model";
+import TeacherCourse from "../teacherCourse/teacherCourse.model";
 
 // const generateRefId = async (courseId: string): Promise<string> => {
 //   const course = await Course.findById(courseId).select("courseCode");
@@ -472,9 +473,115 @@ const createApplicationCourseIntoDB = async (
   return result;
 };
 
+
+
+const getAllTeacherStudentApplicationsFromDb = async (
+  teacherId: string,
+  query: Record<string, unknown>
+) => {
+  const { searchTerm, courseId, intakeId, ...otherQueryParams } = query;
+
+  if (!teacherId) throw new Error("Teacher ID is required");
+
+  // -------------------- 🔍 SEARCH LOGIC --------------------
+  let studentIds: any[] = [];
+  if (searchTerm) {
+    const nameSearchConditions: any[] = [];
+    const searchTerms = String(searchTerm).trim().split(/\s+/);
+
+    if (searchTerms.length === 1) {
+      const term = searchTerms[0];
+      ["email", "firstName", "lastName", "title", "initial", "name"].forEach((field) =>
+        nameSearchConditions.push({ [field]: { $regex: term, $options: "i" } })
+      );
+    } else if (searchTerms.length === 2) {
+      const [first, second] = searchTerms;
+      nameSearchConditions.push(
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { lastName: { $regex: second, $options: "i" } }] },
+        { $and: [{ title: { $regex: first, $options: "i" } }, { firstName: { $regex: second, $options: "i" } }] },
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { initial: { $regex: second, $options: "i" } }] }
+      );
+    } else if (searchTerms.length === 3) {
+      const [first, second, third] = searchTerms;
+      nameSearchConditions.push(
+        { $and: [{ title: { $regex: first, $options: "i" } }, { firstName: { $regex: second, $options: "i" } }, { lastName: { $regex: third, $options: "i" } }] },
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { initial: { $regex: second, $options: "i" } }, { lastName: { $regex: third, $options: "i" } }] }
+      );
+    } else if (searchTerms.length >= 4) {
+      const [first, second, third, fourth] = searchTerms;
+      nameSearchConditions.push({
+        $and: [
+          { title: { $regex: first, $options: "i" } },
+          { firstName: { $regex: second, $options: "i" } },
+          { initial: { $regex: third, $options: "i" } },
+          { lastName: { $regex: fourth, $options: "i" } },
+        ],
+      });
+    }
+
+    // Always add general search across all fields
+    ["email", "firstName", "lastName", "title", "initial", "name"].forEach((field) =>
+      nameSearchConditions.push({ [field]: { $regex: searchTerm, $options: "i" } })
+    );
+
+    const userQuery = new QueryBuilder(User.find({ $or: nameSearchConditions }), {}).fields();
+    const matchingUsers = await userQuery.modelQuery;
+    studentIds = matchingUsers.map((u) => u._id);
+  }
+
+  // -------------------- GET TEACHER COURSES --------------------
+  let teacherCoursesQuery: any = { teacherId };
+  if (courseId) teacherCoursesQuery.courseId = courseId;
+  if (intakeId) teacherCoursesQuery.termId = intakeId;
+
+  const assignedCourses = await TeacherCourse.find(teacherCoursesQuery)
+    .select("courseId termId")
+    .populate("courseId")
+    .populate("termId");
+
+  if (!assignedCourses || assignedCourses.length === 0) {
+    return { meta: { page: 1, limit: 10, total: 0, totalPage: 0 }, result: [] };
+  }
+
+  // Build filter for ApplicationCourse
+  const teacherFilter: any = {
+    $or: assignedCourses.map((c) => ({
+      courseId: c.courseId?._id,
+      intakeId: c.termId._id,
+    })),
+     status: "approved",
+  };
+
+  if (searchTerm && studentIds.length > 0) {
+    teacherFilter.studentId = { $in: studentIds };
+  } else if (searchTerm && studentIds.length === 0) {
+    teacherFilter._id = null; // no matches
+  }
+
+  // -------------------- 📋 MAIN QUERY --------------------
+  const applicationCourseQuery = new QueryBuilder(
+    ApplicationCourse.find(teacherFilter)
+      .populate({ path: "studentId", select: "title firstName initial lastName email phone studentType" })
+      .populate("intakeId")
+      .populate("courseId"),
+    otherQueryParams
+  )
+    .filter(otherQueryParams)
+    .sort()
+    .paginate()
+    .fields();
+
+  const meta = await applicationCourseQuery.countTotal();
+  const result = await applicationCourseQuery.modelQuery;
+
+  return { meta, result };
+};
+
+
 export const ApplicationCourseServices = {
   getAllApplicationCourseFromDB,
   getSingleApplicationCourseFromDB,
   updateApplicationCourseIntoDB,
   createApplicationCourseIntoDB,
+  getAllTeacherStudentApplicationsFromDb
 };
