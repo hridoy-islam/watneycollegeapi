@@ -23,5 +23,9 @@ router.patch(
   AssignmentControllers.updateAssignment
 );
 
+router.get(
+  "/teacher-feedback/:teacherId",
+  AssignmentControllers.getTeacherAssignmentFeedback
+);
 
 export const AssignmentRoutes = router;

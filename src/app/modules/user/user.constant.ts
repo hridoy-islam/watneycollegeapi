@@ -5,7 +5,8 @@ export const USER_ROLE = {
   creator: "creator",
   director: "director",
   student: "student",
-  applicant: "applicant"
+  applicant: "applicant",
+  teacher:"teacher"
 } as const;
 
 export const UserStatus = ["block", "active"];

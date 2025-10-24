@@ -20,7 +20,7 @@ const userSchema = new Schema<TUser, UserModel>(
     },
     role: {
       type: String,
-      enum: ["user", "admin", "student", "applicant"],
+      enum: ["user", "admin", "student", "applicant","teacher"],
       default: "student",
     },
     status: {
@@ -70,6 +70,7 @@ const userSchema = new Schema<TUser, UserModel>(
       type: Boolean,
       default: false,
     },
+    
     userAgentInfo: {
       type: [
         {

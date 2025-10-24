@@ -211,7 +211,7 @@ export interface TUser {
   name: string;
   email: string;
   password: string;
-  role: "user" | "admin" | "student" | "applicant";
+  role: "user" | "admin" | "student" | "applicant"|"teacher";
   status: "block" | "active"; 
   isDeleted: boolean;
   authorized: boolean;

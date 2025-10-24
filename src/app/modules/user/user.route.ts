@@ -8,18 +8,18 @@ import { upload } from "../../utils/multer";
 const router = express.Router();
 router.get(
   "/",
-  auth("admin",  "user", "student","applicant"),
+  auth("admin",  "user", "student","applicant","teacher"),
   UserControllers.getAllUser
 );
 router.get(
   "/:id",
-  auth("admin",  "user", "student","applicant"),
+  auth("admin",  "user", "student","applicant","teacher"),
   UserControllers.getSingleUser
 );
 
 router.patch(
   "/:id",
-  auth("admin",  "user", "student","applicant"),
+  auth("admin",  "user", "student","applicant","teacher"),
   UserControllers.updateUser
 );
 

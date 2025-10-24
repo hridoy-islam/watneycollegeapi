@@ -46,10 +46,26 @@ const createAssignment: RequestHandler = catchAsync(async (req, res) => {
   });
 });
 
+const getTeacherAssignmentFeedback= catchAsync(async (req, res) => {
+  const {teacherId} = req.params; 
+  const query = req.query;
+
+  const result = await AssignmentServices.getTeacherAssignmentFeedbackFromDB(teacherId, query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Teacher assignment feedback retrieved successfully",
+    data: result,
+  });
+});
+
+
 export const AssignmentControllers = {
   getAllAssignment,
   getSingleAssignment,
   updateAssignment,
-  createAssignment
+  createAssignment,
+  getTeacherAssignmentFeedback
   
 };
