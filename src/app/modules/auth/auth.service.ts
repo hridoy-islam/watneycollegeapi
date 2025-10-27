@@ -4,6 +4,8 @@ import { User } from "../user/user.model";
 import { TCreateUser, TLogin } from "./auth.interface";
 import bcrypt from "bcrypt";
 import jwt, { JwtPayload } from "jsonwebtoken";
+// import moment from "moment";
+import moment from 'moment-timezone';
 
 import { createToken, verifyToken } from "./auth.utils";
 import { sendEmail } from "../../utils/sendEmail";
@@ -12,7 +14,6 @@ import { Secret } from "jsonwebtoken";
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
-import moment from "moment";
 import * as UAParser from "ua-parser-js";
 
 import requestIp from "request-ip";
@@ -93,11 +94,11 @@ const checkLogin = async (payload: TLogin, req: any) => {
 
 
     // ✅ Create login log if user is a teacher
-    if (foundUser.role === "teacher") {
+    if (foundUser.role === "teacher" || foundUser.role === "admin") {
       await Logs.create({
         userId: foundUser._id,
         action: "login",
-        loginAt: moment().toDate(), 
+         loginAt: moment().tz("Europe/London").toDate(),
       });
     }
 
