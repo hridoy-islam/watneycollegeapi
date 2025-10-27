@@ -21,6 +21,7 @@ const auth_utils_1 = require("./auth.utils");
 const sendEmail_1 = require("../../utils/sendEmail");
 const config_1 = __importDefault(require("../../config"));
 const moment_1 = __importDefault(require("moment"));
+const logs_model_1 = __importDefault(require("../logs/logs.model"));
 function generateOtpAndExpiry() {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
     const otpExpiry = (0, moment_1.default)().add(10, "minutes").toDate();
@@ -58,11 +59,19 @@ const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function*
             authorized: foundUser === null || foundUser === void 0 ? void 0 : foundUser.authorized,
             isValided: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isValided,
             isCompleted: foundUser === null || foundUser === void 0 ? void 0 : foundUser.isCompleted,
-            studentType: foundUser === null || foundUser === void 0 ? void 0 : foundUser.studentType
+            studentType: foundUser === null || foundUser === void 0 ? void 0 : foundUser.studentType,
         };
         // Generate access and refresh tokens
         const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
         const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in);
+        // ✅ Create login log if user is a teacher
+        if (foundUser.role === "teacher") {
+            yield logs_model_1.default.create({
+                userId: foundUser._id,
+                action: "login",
+                loginAt: (0, moment_1.default)().toDate(),
+            });
+        }
         return {
             accessToken,
             refreshToken,
@@ -206,7 +215,7 @@ const verifyEmailIntoDB = (email, otp) => __awaiter(void 0, void 0, void 0, func
         email: foundUser.email,
         name: foundUser.name,
         role: foundUser.role,
-        isValided: foundUser.isValided
+        isValided: foundUser.isValided,
     };
     const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
     const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in);
@@ -343,5 +352,5 @@ exports.AuthServices = {
     ChangePassword,
     validateOtp,
     requestOtp,
-    personalInformationIntoDB
+    personalInformationIntoDB,
 };

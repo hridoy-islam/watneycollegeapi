@@ -12,64 +12,62 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AssignmentControllers = void 0;
+exports.LogsControllers = void 0;
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
-const assignment_service_1 = require("./assignment.service");
-const getAllAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield assignment_service_1.AssignmentServices.getAllAssignmentFromDB(req.query);
+const logs_service_1 = require("./logs.service");
+const LogsCreate = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield logs_service_1.LogsServices.createLogsIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Assignments retrived succesfully",
+        message: "Logs created successfully",
         data: result,
     });
 }));
-const getSingleAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllLogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield logs_service_1.LogsServices.getAllLogsFromDB(req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Logs retrived succesfully",
+        data: result,
+    });
+}));
+const getSingleLogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield assignment_service_1.AssignmentServices.getSingleAssignmentFromDB(id);
+    const result = yield logs_service_1.LogsServices.getSingleLogsFromDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Assignment is retrieved succesfully",
+        message: "Logs is retrieved succesfully",
         data: result,
     });
 }));
-const updateAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateLogs = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield logs_service_1.LogsServices.updateLogsIntoDB(req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Logs is updated succesfully",
+        data: result,
+    });
+}));
+const updateLogsById = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield assignment_service_1.AssignmentServices.updateAssignmentIntoDB(id, req.body);
+    const result = yield logs_service_1.LogsServices.updateLogsByIdIntoDB(id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Assignment is updated succesfully",
+        message: "Logs is updated succesfully",
         data: result,
     });
 }));
-const createAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield assignment_service_1.AssignmentServices.createAssignmentIntoDB(req.body);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.CREATED,
-        success: true,
-        message: "Assignment created successfully",
-        data: result,
-    });
-}));
-const getTeacherAssignmentFeedback = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { teacherId } = req.params;
-    const query = req.query;
-    const result = yield assignment_service_1.AssignmentServices.getTeacherAssignmentFeedbackFromDB(teacherId, query);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.OK,
-        success: true,
-        message: "Teacher assignment feedback retrieved successfully",
-        data: result,
-    });
-}));
-exports.AssignmentControllers = {
-    getAllAssignment,
-    getSingleAssignment,
-    updateAssignment,
-    createAssignment,
-    getTeacherAssignmentFeedback
+exports.LogsControllers = {
+    getAllLogs,
+    getSingleLogs,
+    updateLogs,
+    LogsCreate,
+    updateLogsById
 };

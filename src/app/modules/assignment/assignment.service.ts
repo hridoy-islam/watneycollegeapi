@@ -96,7 +96,7 @@ const getTeacherAssignmentFeedbackFromDB = async (
     };
   }
 
-  const courseIds = teacherCourses.map(tc => tc.courseId);
+const courseIds = (teacherCourses as any[]).map(tc => tc.courseId);
 
   // Extract filters from query
   const courseIdFilter = query.courseId ? String(query.courseId) : null;

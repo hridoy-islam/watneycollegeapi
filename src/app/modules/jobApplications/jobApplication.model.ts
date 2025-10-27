@@ -7,7 +7,15 @@ const JobApplicationSchema = new Schema<TJobApplication>(
   {
     jobId: { type: Schema.Types.ObjectId, ref: 'Job', required: true },
     applicantId:{type: Schema.Types.ObjectId, ref: 'User', required: true },
-    seen:{ type: Boolean, default: false}
+    seen:{ type: Boolean, default: false},
+    status: { 
+      type: String, 
+      enum: ['applied', 'recruit', 'rejected'], 
+      default: 'applied' 
+    },
+  },
+   {
+    timestamps: true, 
   }
 );
 

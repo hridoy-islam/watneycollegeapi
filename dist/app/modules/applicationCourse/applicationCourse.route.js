@@ -12,4 +12,5 @@ router.get("/", applicationCourse_controller_1.ApplicationCourseControllers.getA
 router.post("/", applicationCourse_controller_1.ApplicationCourseControllers.createApplicationCourse);
 router.get("/:id", applicationCourse_controller_1.ApplicationCourseControllers.getSingleApplicationCourse);
 router.patch("/:id", applicationCourse_controller_1.ApplicationCourseControllers.updateApplicationCourse);
+router.get("/teacher/:id", applicationCourse_controller_1.ApplicationCourseControllers.getAllTeacherStudentApplications);
 exports.ApplicationCourseRoutes = router;

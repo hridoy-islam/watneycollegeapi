@@ -25,7 +25,9 @@ const AssignmentSchema = new mongoose_1.Schema({
     applicationId: { type: mongoose_1.Schema.Types.ObjectId, ref: "ApplicationCourse" },
     unitId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnit" },
     studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    assignmentName: { type: String, required: true },
+    unitMaterialId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnitMaterial", },
+    // assignmentName: { type: String, required: true },
+    courseMaterialAssignmentId: { type: String, required: true },
     // Array of submission attempts
     submissions: [SubmissionSchema],
     requireResubmit: { type: Boolean, default: false },

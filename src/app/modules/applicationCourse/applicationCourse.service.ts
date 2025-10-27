@@ -98,23 +98,222 @@ const generateRefId = async (courseId: string): Promise<string> => {
   return refId!;
 };
 
+// const getAllApplicationCourseFromDB = async (
+//   query: Record<string, unknown>
+// ) => {
+//   const { searchTerm, ...otherQueryParams } = query;
+
+  
+
+//   let studentIds: any = [];
+
+//   // If searchTerm is provided, search in User model first
+//   if (searchTerm) {
+//     // Create search conditions for different name combinations
+//     const nameSearchConditions = [];
+    
+//     // Split search term into parts for name combination searches
+//     const searchTerms = String(searchTerm).trim().split(/\s+/);
+    
+//     if (searchTerms.length === 1) {
+//       // Single term - search in individual fields
+//       const term = searchTerms[0];
+//       nameSearchConditions.push(
+//         { email: { $regex: term, $options: "i" } },
+//         { firstName: { $regex: term, $options: "i" } },
+//         { lastName: { $regex: term, $options: "i" } },
+//         { title: { $regex: term, $options: "i" } },
+//         { initial: { $regex: term, $options: "i" } },
+//         { name: { $regex: term, $options: "i" } }
+//       );
+//     } else if (searchTerms.length === 2) {
+//       // Two terms - could be "firstName lastName", "title firstName", etc.
+//       const [first, second] = searchTerms;
+      
+//       // Try different combinations
+//       nameSearchConditions.push(
+//         // firstName + lastName
+//         {
+//           $and: [
+//             { firstName: { $regex: first, $options: "i" } },
+//             { lastName: { $regex: second, $options: "i" } }
+//           ]
+//         },
+//         // title + firstName
+//         {
+//           $and: [
+//             { title: { $regex: first, $options: "i" } },
+//             { firstName: { $regex: second, $options: "i" } }
+//           ]
+//         },
+//         // firstName + initial
+//         {
+//           $and: [
+//             { firstName: { $regex: first, $options: "i" } },
+//             { initial: { $regex: second, $options: "i" } }
+//           ]
+//         }
+//       );
+//     } else if (searchTerms.length === 3) {
+//       // Three terms - could be "title firstName lastName", "firstName initial lastName", etc.
+//       const [first, second, third] = searchTerms;
+      
+//       nameSearchConditions.push(
+//         // title + firstName + lastName
+//         {
+//           $and: [
+//             { title: { $regex: first, $options: "i" } },
+//             { firstName: { $regex: second, $options: "i" } },
+//             { lastName: { $regex: third, $options: "i" } }
+//           ]
+//         },
+//         // firstName + initial + lastName
+//         {
+//           $and: [
+//             { firstName: { $regex: first, $options: "i" } },
+//             { initial: { $regex: second, $options: "i" } },
+//             { lastName: { $regex: third, $options: "i" } }
+//           ]
+//         }
+//       );
+//     } else if (searchTerms.length >= 4) {
+//       // Four or more terms - try title + firstName + initial + lastName combination
+//       const [first, second, third, fourth] = searchTerms;
+      
+//       nameSearchConditions.push(
+//         {
+//           $and: [
+//             { title: { $regex: first, $options: "i" } },
+//             { firstName: { $regex: second, $options: "i" } },
+//             { initial: { $regex: third, $options: "i" } },
+//             { lastName: { $regex: fourth, $options: "i" } }
+//           ]
+//         }
+//       );
+//     }
+
+//     // Also search for the original full search term in individual fields
+//     nameSearchConditions.push(
+//       { email: { $regex: searchTerm, $options: "i" } },
+//       { firstName: { $regex: searchTerm, $options: "i" } },
+//       { lastName: { $regex: searchTerm, $options: "i" } },
+//       { title: { $regex: searchTerm, $options: "i" } },
+//       { initial: { $regex: searchTerm, $options: "i" } },
+//       { name: { $regex: searchTerm, $options: "i" } }
+//     );
+
+//     const userQuery = new QueryBuilder(
+//       User.find({
+//         $and: [
+//         { _id: { $in: eligibleStudentIds } }, // Only completed students
+//         { $or: nameSearchConditions }
+//       ]
+//       }),
+//       {}
+//     ).fields();
+
+//     const matchingUsers = await userQuery.modelQuery;
+//     studentIds = matchingUsers.map((user) => user._id);
+//   }
+
+//   // Build the main ApplicationCourse query
+//   let applicationCourseQuery;
+
+//   if (searchTerm && studentIds.length > 0) {
+//     // If we have matching student IDs, search by studentId
+//     applicationCourseQuery = new QueryBuilder(
+//       ApplicationCourse.find({
+//         studentId: { $in: studentIds },
+//       })
+//         .populate({
+//           path: "studentId",
+//           select: "title firstName initial lastName email phone studentType",
+//         })
+//         .populate("intakeId")
+//         .populate("courseId"),
+//       otherQueryParams
+//     )
+//       .filter(otherQueryParams)
+//       .sort()
+//       .paginate()
+//       .fields();
+//   } else if (searchTerm && studentIds.length === 0) {
+//     // If searchTerm provided but no matching users found, return empty result
+//     applicationCourseQuery = new QueryBuilder(
+//       ApplicationCourse.find({ _id: null }) // Force no results
+//         .populate({
+//           path: "studentId",
+//           select: "title firstName initial lastName email phone studentType",
+//         })
+//         .populate("intakeId")
+//         .populate("courseId"),
+//       otherQueryParams
+//     )
+//       .filter(otherQueryParams)
+//       .sort()
+//       .paginate()
+//       .fields();
+//   } else {
+//     // Normal query without searchTerm
+//     applicationCourseQuery = new QueryBuilder(
+//       ApplicationCourse.find()
+//         .populate({
+//           path: "studentId",
+//           select: "title firstName initial lastName email phone studentType",
+//         })
+//         .populate("intakeId")
+//         .populate("courseId"),
+//       query
+//     )
+//       .search(ApplicationCourseSearchableFields)
+//       .filter(query)
+//       .sort()
+//       .paginate()
+//       .fields();
+//   }
+
+//   const meta = await applicationCourseQuery.countTotal();
+//   const result = await applicationCourseQuery.modelQuery;
+
+//   return {
+//     meta,
+//     result,
+//   };
+// };
+
+
+
 const getAllApplicationCourseFromDB = async (
   query: Record<string, unknown>
 ) => {
   const { searchTerm, ...otherQueryParams } = query;
 
-  let studentIds: any = [];
+  // Always restrict to students with isCompleted: true
+  let eligibleStudentIds = [];
 
-  // If searchTerm is provided, search in User model first
+  // Fetch all student IDs where isCompleted is true
+  const completedStudents = await User.find(
+    { isCompleted: true },
+    { _id: 1 }
+  ).lean();
+  eligibleStudentIds = completedStudents.map(u => u._id);
+
+  // If no completed students, return empty result early
+  if (eligibleStudentIds.length === 0) {
+    return {
+      meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+      result: [],
+    };
+  }
+
+  let studentIdsToFilter = [...eligibleStudentIds];
+
+  // If searchTerm is provided, further narrow down by search
   if (searchTerm) {
-    // Create search conditions for different name combinations
     const nameSearchConditions = [];
-    
-    // Split search term into parts for name combination searches
     const searchTerms = String(searchTerm).trim().split(/\s+/);
-    
+
     if (searchTerms.length === 1) {
-      // Single term - search in individual fields
       const term = searchTerms[0];
       nameSearchConditions.push(
         { email: { $regex: term, $options: "i" } },
@@ -125,49 +324,22 @@ const getAllApplicationCourseFromDB = async (
         { name: { $regex: term, $options: "i" } }
       );
     } else if (searchTerms.length === 2) {
-      // Two terms - could be "firstName lastName", "title firstName", etc.
       const [first, second] = searchTerms;
-      
-      // Try different combinations
       nameSearchConditions.push(
-        // firstName + lastName
-        {
-          $and: [
-            { firstName: { $regex: first, $options: "i" } },
-            { lastName: { $regex: second, $options: "i" } }
-          ]
-        },
-        // title + firstName
-        {
-          $and: [
-            { title: { $regex: first, $options: "i" } },
-            { firstName: { $regex: second, $options: "i" } }
-          ]
-        },
-        // firstName + initial
-        {
-          $and: [
-            { firstName: { $regex: first, $options: "i" } },
-            { initial: { $regex: second, $options: "i" } }
-          ]
-        }
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { lastName: { $regex: second, $options: "i" } }] },
+        { $and: [{ title: { $regex: first, $options: "i" } }, { firstName: { $regex: second, $options: "i" } }] },
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { initial: { $regex: second, $options: "i" } }] }
       );
     } else if (searchTerms.length === 3) {
-      // Three terms - could be "title firstName lastName", "firstName initial lastName", etc.
       const [first, second, third] = searchTerms;
-      
       nameSearchConditions.push(
-        // title + firstName + lastName
-        {
-          $and: [
+        { $and: [
             { title: { $regex: first, $options: "i" } },
             { firstName: { $regex: second, $options: "i" } },
             { lastName: { $regex: third, $options: "i" } }
           ]
         },
-        // firstName + initial + lastName
-        {
-          $and: [
+        { $and: [
             { firstName: { $regex: first, $options: "i" } },
             { initial: { $regex: second, $options: "i" } },
             { lastName: { $regex: third, $options: "i" } }
@@ -175,22 +347,18 @@ const getAllApplicationCourseFromDB = async (
         }
       );
     } else if (searchTerms.length >= 4) {
-      // Four or more terms - try title + firstName + initial + lastName combination
       const [first, second, third, fourth] = searchTerms;
-      
-      nameSearchConditions.push(
-        {
-          $and: [
-            { title: { $regex: first, $options: "i" } },
-            { firstName: { $regex: second, $options: "i" } },
-            { initial: { $regex: third, $options: "i" } },
-            { lastName: { $regex: fourth, $options: "i" } }
-          ]
-        }
-      );
+      nameSearchConditions.push({
+        $and: [
+          { title: { $regex: first, $options: "i" } },
+          { firstName: { $regex: second, $options: "i" } },
+          { initial: { $regex: third, $options: "i" } },
+          { lastName: { $regex: fourth, $options: "i" } }
+        ]
+      });
     }
 
-    // Also search for the original full search term in individual fields
+    // Also search full term in individual fields
     nameSearchConditions.push(
       { email: { $regex: searchTerm, $options: "i" } },
       { firstName: { $regex: searchTerm, $options: "i" } },
@@ -200,72 +368,42 @@ const getAllApplicationCourseFromDB = async (
       { name: { $regex: searchTerm, $options: "i" } }
     );
 
-    const userQuery = new QueryBuilder(
-      User.find({
-        $or: nameSearchConditions
-      }),
-      {}
-    ).fields();
+    // Search only among completed students
+    const matchingUsers = await User.find({
+      $and: [
+        { _id: { $in: eligibleStudentIds } }, // Only completed students
+        { $or: nameSearchConditions }
+      ]
+    }).select('_id');
 
-    const matchingUsers = await userQuery.modelQuery;
-    studentIds = matchingUsers.map((user) => user._id);
+    studentIdsToFilter = matchingUsers.map(user => user._id);
+
+    // If no matches, return empty
+    if (studentIdsToFilter.length === 0) {
+      return {
+        meta: { total: 0, page: 1, limit: 10, totalPages: 0 },
+        result: [],
+      };
+    }
   }
 
-  // Build the main ApplicationCourse query
-  let applicationCourseQuery;
-
-  if (searchTerm && studentIds.length > 0) {
-    // If we have matching student IDs, search by studentId
-    applicationCourseQuery = new QueryBuilder(
-      ApplicationCourse.find({
-        studentId: { $in: studentIds },
+  // Now build ApplicationCourse query restricted to eligible (and optionally searched) students
+  const applicationCourseQuery = new QueryBuilder(
+    ApplicationCourse.find({
+      studentId: { $in: studentIdsToFilter }
+    })
+      .populate({
+        path: "studentId",
+        select: "title firstName initial lastName email phone studentType isCompleted",
       })
-        .populate({
-          path: "studentId",
-          select: "title firstName initial lastName email phone studentType",
-        })
-        .populate("intakeId")
-        .populate("courseId"),
-      otherQueryParams
-    )
-      .filter(otherQueryParams)
-      .sort()
-      .paginate()
-      .fields();
-  } else if (searchTerm && studentIds.length === 0) {
-    // If searchTerm provided but no matching users found, return empty result
-    applicationCourseQuery = new QueryBuilder(
-      ApplicationCourse.find({ _id: null }) // Force no results
-        .populate({
-          path: "studentId",
-          select: "title firstName initial lastName email phone studentType",
-        })
-        .populate("intakeId")
-        .populate("courseId"),
-      otherQueryParams
-    )
-      .filter(otherQueryParams)
-      .sort()
-      .paginate()
-      .fields();
-  } else {
-    // Normal query without searchTerm
-    applicationCourseQuery = new QueryBuilder(
-      ApplicationCourse.find()
-        .populate({
-          path: "studentId",
-          select: "title firstName initial lastName email phone studentType",
-        })
-        .populate("intakeId")
-        .populate("courseId"),
-      query
-    )
-      .search(ApplicationCourseSearchableFields)
-      .filter(query)
-      .sort()
-      .paginate()
-      .fields();
-  }
+      .populate("intakeId")
+      .populate("courseId"),
+    otherQueryParams
+  )
+    .filter(otherQueryParams)
+    .sort()
+    .paginate()
+    .fields();
 
   const meta = await applicationCourseQuery.countTotal();
   const result = await applicationCourseQuery.modelQuery;
@@ -545,7 +683,7 @@ const getAllTeacherStudentApplicationsFromDb = async (
 
   // Build filter for ApplicationCourse
   const teacherFilter: any = {
-    $or: assignedCourses.map((c) => ({
+     $or: (assignedCourses as any[]).map((c: any) => ({
       courseId: c.courseId?._id,
       intakeId: c.termId._id,
     })),

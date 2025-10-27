@@ -5,4 +5,5 @@ export interface TJobApplication {
   jobId: Types.ObjectId;
   applicantId: Types.ObjectId;
   seen: boolean;
+  status:string
 }

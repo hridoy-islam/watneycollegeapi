@@ -18,6 +18,8 @@ const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
 const user_constant_1 = require("./user.constant");
 const user_model_1 = require("./user.model");
 const AppError_1 = __importDefault(require("../../errors/AppError"));
+const config_1 = __importDefault(require("../../config"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
 const getAllUserFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const userQuery = new QueryBuilder_1.default(user_model_1.User.find(), query)
         .search(user_constant_1.UserSearchableFields)
@@ -40,6 +42,9 @@ const updateUserIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, func
     const user = yield user_model_1.User.findById(id);
     if (!user) {
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");
+    }
+    if (payload.password) {
+        payload.password = yield bcrypt_1.default.hash(payload.password, Number(config_1.default.bcrypt_salt_rounds));
     }
     const result = yield user_model_1.User.findByIdAndUpdate(id, payload, {
         new: true,

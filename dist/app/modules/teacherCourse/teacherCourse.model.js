@@ -24,16 +24,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const courseSchema = new mongoose_1.Schema({
-    name: { type: String, required: true },
-    courseCode: { type: String, required: true },
-    description: { type: String },
-    status: {
-        type: Number,
-        enum: [0, 1],
-        default: 1,
-    },
-}, { timestamps: true });
+const TeacherCourseSchema = new mongoose_1.Schema({
+    courseId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Course", required: true },
+    teacherId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+    termId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Term", required: true },
+});
 // Apply the type at the model level
-const Course = mongoose_1.default.model("Course", courseSchema);
-exports.default = Course;
+const TeacherCourse = mongoose_1.default.model("TeacherCourse", TeacherCourseSchema);
+exports.default = TeacherCourse;

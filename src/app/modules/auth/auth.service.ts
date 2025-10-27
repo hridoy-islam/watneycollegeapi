@@ -13,10 +13,11 @@ import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import moment from "moment";
-import * as UAParser from 'ua-parser-js';
+import * as UAParser from "ua-parser-js";
 
 import requestIp from "request-ip";
 import crypto from "crypto";
+import Logs from "../logs/logs.model";
 
 function generateOtpAndExpiry() {
   const otp = Math.floor(1000 + Math.random() * 9000).toString();
@@ -44,11 +45,6 @@ const checkLogin = async (payload: TLogin, req: any) => {
     ) {
       throw new AppError(httpStatus.FORBIDDEN, "Password does not match");
     }
-
-    
-    
-    
-
 
     // If user is not authorized, generate OTP and send it
     if (!foundUser.isValided) {
@@ -78,9 +74,9 @@ const checkLogin = async (payload: TLogin, req: any) => {
       authorized: foundUser?.authorized,
       isValided: foundUser?.isValided,
       isCompleted: foundUser?.isCompleted,
-      studentType: foundUser?.studentType
+      studentType: foundUser?.studentType,
     };
-    
+
     // Generate access and refresh tokens
     const accessToken = createToken(
       jwtPayload,
@@ -94,6 +90,19 @@ const checkLogin = async (payload: TLogin, req: any) => {
       config.jwt_refresh_expires_in as string
     );
 
+
+
+    // ✅ Create login log if user is a teacher
+    if (foundUser.role === "teacher") {
+      await Logs.create({
+        userId: foundUser._id,
+        action: "login",
+        loginAt: moment().toDate(), 
+      });
+    }
+
+
+    
     return {
       accessToken,
       refreshToken,
@@ -106,6 +115,11 @@ const checkLogin = async (payload: TLogin, req: any) => {
     );
   }
 };
+
+
+
+
+
 const refreshToken = async (token: string) => {
   if (!token || typeof token !== "string") {
     throw new AppError(
@@ -242,7 +256,7 @@ const createUserIntoDB = async (payload: TCreateUser) => {
   const result = await User.create(newUserPayload);
 
   try {
-   await sendEmail(
+    await sendEmail(
       payload.email,
       "welcome_template",
       "Welcome to Watney College",
@@ -302,7 +316,7 @@ export const verifyEmailIntoDB = async (email: string, otp: string) => {
     email: foundUser.email,
     name: foundUser.name,
     role: foundUser.role,
-    isValided: foundUser.isValided
+    isValided: foundUser.isValided,
   };
 
   const accessToken = createToken(
@@ -317,9 +331,13 @@ export const verifyEmailIntoDB = async (email: string, otp: string) => {
     config.jwt_refresh_expires_in as string
   );
 
-  const emailSubject ="Your Account Has Been Verified"
-    await sendEmail(foundUser.email, "complete_verification", emailSubject, foundUser.name);
-
+  const emailSubject = "Your Account Has Been Verified";
+  await sendEmail(
+    foundUser.email,
+    "complete_verification",
+    emailSubject,
+    foundUser.name
+  );
 
   return {
     accessToken,
@@ -352,20 +370,18 @@ const forgetPasswordOtp = async (email: string) => {
   }
 };
 
-const resetPassword = async ( payload: { userId: string; password: string }) => {
-const user = await User.findOne({ _id: payload.userId }).select("+password");
+const resetPassword = async (payload: { userId: string; password: string }) => {
+  const user = await User.findOne({ _id: payload.userId }).select("+password");
 
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "This user is not found !");
   }
 
-  
   user.password = payload.password;
   await user.save();
-    const emailSubject = "Your Watney College Account Password Has Been Changed";
+  const emailSubject = "Your Watney College Account Password Has Been Changed";
 
-    await sendEmail(user.email, "password_change", emailSubject, user.name);
-
+  await sendEmail(user.email, "password_change", emailSubject, user.name);
 
   return { message: "Password updated successfully" };
 };
@@ -412,7 +428,7 @@ const requestOtp = async (email: string) => {
   });
   const emailSubject = "Reset Your Account Password";
 
- await sendEmail(
+  await sendEmail(
     email,
     "reset_password_template",
     emailSubject,
@@ -451,7 +467,6 @@ const validateOtp = async (email: string, otp: string) => {
 
   await passwordReset.updateOne({ isUsed: true, otp: "" });
 
-
   // Create the reset token (JWT)
   const resetToken = jwt.sign(
     {
@@ -475,7 +490,7 @@ const validateOtp = async (email: string, otp: string) => {
   // Return the reset token for further use
   return { resetToken };
 };
-const personalInformationIntoDB = async (id: string, payload:any) => {
+const personalInformationIntoDB = async (id: string, payload: any) => {
   const user = await User.findById(id);
   if (!user) {
     throw new AppError(httpStatus.NOT_FOUND, "User not found");
@@ -489,12 +504,6 @@ const personalInformationIntoDB = async (id: string, payload:any) => {
   return result;
 };
 
-
-
-
-
-
-
 export const AuthServices = {
   checkLogin,
   createUserIntoDB,
@@ -507,6 +516,5 @@ export const AuthServices = {
   ChangePassword,
   validateOtp,
   requestOtp,
-  personalInformationIntoDB
-  
+  personalInformationIntoDB,
 };

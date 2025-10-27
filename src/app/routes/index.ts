@@ -18,6 +18,7 @@ import { CourseUnitMaterial } from "../modules/courseUnitMaterial/courseUnitMate
 import { CourseUnitMaterialRoutes } from "../modules/courseUnitMaterial/courseUnitMaterial.route";
 import { CourseDocumentRoutes } from "../modules/courseDocument/courseDocument.route";
 import { TeacherCourseRoutes } from "../modules/teacherCourse/teacherCourse.route";
+import { LogsRoutes } from "../modules/logs/logs.route";
 
 const router = Router();
 
@@ -68,7 +69,6 @@ const moduleRoutes = [
     route: EmailRoutes,
   },
 
- 
   {
     path: "/signature",
     route: SignatureRoutes,
@@ -85,15 +85,19 @@ const moduleRoutes = [
     path: "/unit-material",
     route: CourseUnitMaterialRoutes,
   },
-    {
+  {
     path: "/course-document",
     route: CourseDocumentRoutes,
   },
-   {
+  {
     path: "/teacher-courses",
     route: TeacherCourseRoutes,
   },
- 
+
+  {
+    path: "/logs",
+    route: LogsRoutes,
+  },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

@@ -8,7 +8,8 @@ exports.USER_ROLE = {
     creator: "creator",
     director: "director",
     student: "student",
-    applicant: "applicant"
+    applicant: "applicant",
+    teacher: "teacher"
 };
 exports.UserStatus = ["block", "active"];
 exports.UserSearchableFields = ["email", "name", "role"];

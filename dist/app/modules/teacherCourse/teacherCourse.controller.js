@@ -12,64 +12,63 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AssignmentControllers = void 0;
+exports.TeacherCourseControllers = void 0;
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_1 = __importDefault(require("http-status"));
-const assignment_service_1 = require("./assignment.service");
-const getAllAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield assignment_service_1.AssignmentServices.getAllAssignmentFromDB(req.query);
+const teacherCourse_service_1 = require("./teacherCourse.service");
+const TeacherCourseCreate = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield teacherCourse_service_1.TeacherCourseServices.createTeacherCourseIntoDB(req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Assignments retrived succesfully",
+        message: "TeacherCourse created successfully",
         data: result,
     });
 }));
-const getSingleAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getAllTeacherCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const result = yield teacherCourse_service_1.TeacherCourseServices.getAllTeacherCourseFromDB(req.query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "TeacherCourse retrived succesfully",
+        data: result,
+    });
+}));
+const getSingleTeacherCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield assignment_service_1.AssignmentServices.getSingleAssignmentFromDB(id);
+    const result = yield teacherCourse_service_1.TeacherCourseServices.getSingleTeacherCourseFromDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Assignment is retrieved succesfully",
+        message: "TeacherCourse is retrieved succesfully",
         data: result,
     });
 }));
-const updateAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const updateTeacherCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const result = yield assignment_service_1.AssignmentServices.updateAssignmentIntoDB(id, req.body);
+    const result = yield teacherCourse_service_1.TeacherCourseServices.updateTeacherCourseIntoDB(id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Assignment is updated succesfully",
+        message: "TeacherCourse is updated succesfully",
         data: result,
     });
 }));
-const createAssignment = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield assignment_service_1.AssignmentServices.createAssignmentIntoDB(req.body);
-    (0, sendResponse_1.default)(res, {
-        statusCode: http_status_1.default.CREATED,
-        success: true,
-        message: "Assignment created successfully",
-        data: result,
-    });
-}));
-const getTeacherAssignmentFeedback = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { teacherId } = req.params;
-    const query = req.query;
-    const result = yield assignment_service_1.AssignmentServices.getTeacherAssignmentFeedbackFromDB(teacherId, query);
+const deleteTeacherCourse = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { id } = req.params;
+    const result = yield teacherCourse_service_1.TeacherCourseServices.deleteTeacherCourseIntoDB(id);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_1.default.OK,
         success: true,
-        message: "Teacher assignment feedback retrieved successfully",
+        message: "TeacherCourse is deleted succesfully",
         data: result,
     });
 }));
-exports.AssignmentControllers = {
-    getAllAssignment,
-    getSingleAssignment,
-    updateAssignment,
-    createAssignment,
-    getTeacherAssignmentFeedback
+exports.TeacherCourseControllers = {
+    getAllTeacherCourse,
+    getSingleTeacherCourse,
+    updateTeacherCourse,
+    TeacherCourseCreate,
+    deleteTeacherCourse
 };

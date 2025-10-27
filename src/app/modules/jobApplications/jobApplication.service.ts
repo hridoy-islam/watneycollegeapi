@@ -15,13 +15,14 @@ const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
 
   const processedQuery: Record<string, any> = { ...otherQueryParams };
 
- 
-
   const ApplicationQuery = new QueryBuilder(
-    JobApplication.find().populate("jobId").populate({
-      path: "applicantId",
-      select: "title firstName initial lastName email phone",
-    }),
+    JobApplication.find()
+      .populate("jobId")
+      .populate({
+        path: "applicantId",
+        select: "title firstName initial lastName email phone postalAddressLine1 isCompleted",
+        match: { isCompleted: true },
+      }),
     processedQuery
   )
     .filter(query)
@@ -32,11 +33,15 @@ const getAllJobApplicationFromDB = async (query: Record<string, unknown>) => {
   const meta = await ApplicationQuery.countTotal();
   const result = await ApplicationQuery.modelQuery;
 
+  // Remove applications where applicantId is null after the match
+  const filteredResult = result.filter((app: any) => app.applicantId);
+
   return {
     meta,
-    result,
+    result: filteredResult,
   };
 };
+
 
 const getSingleJobApplicationFromDB = async (id: string) => {
   const result = await JobApplication.findById(id).populate("jobId");

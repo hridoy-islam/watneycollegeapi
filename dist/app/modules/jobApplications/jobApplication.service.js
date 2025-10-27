@@ -34,9 +34,12 @@ const sendEmailAdmin_1 = require("../../utils/sendEmailAdmin");
 const getAllJobApplicationFromDB = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const { searchTerm } = query, otherQueryParams = __rest(query, ["searchTerm"]);
     const processedQuery = Object.assign({}, otherQueryParams);
-    const ApplicationQuery = new QueryBuilder_1.default(jobApplication_model_1.JobApplication.find().populate("jobId").populate({
+    const ApplicationQuery = new QueryBuilder_1.default(jobApplication_model_1.JobApplication.find()
+        .populate("jobId")
+        .populate({
         path: "applicantId",
-        select: "title firstName initial lastName email phone",
+        select: "title firstName initial lastName email phone postalAddressLine1 isCompleted",
+        match: { isCompleted: true },
     }), processedQuery)
         .filter(query)
         .sort()
@@ -44,9 +47,11 @@ const getAllJobApplicationFromDB = (query) => __awaiter(void 0, void 0, void 0, 
         .fields();
     const meta = yield ApplicationQuery.countTotal();
     const result = yield ApplicationQuery.modelQuery;
+    // Remove applications where applicantId is null after the match
+    const filteredResult = result.filter((app) => app.applicantId);
     return {
         meta,
-        result,
+        result: filteredResult,
     };
 });
 const getSingleJobApplicationFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
