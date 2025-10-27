@@ -86,7 +86,6 @@ const getTeacherAssignmentFeedbackFromDB = async (
   teacherId: string,
   query: Record<string, unknown>
 ) => {
-  // 1️⃣ Get all course IDs assigned to the teacher
   const teacherCourses = await TeacherCourse.find({ teacherId }).select("courseId");
 
   if (!teacherCourses || teacherCourses.length === 0) {
