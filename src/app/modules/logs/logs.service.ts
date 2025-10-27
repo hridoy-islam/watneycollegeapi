@@ -38,6 +38,8 @@ const getAllLogsFromDB = async (query: Record<string, unknown>, currentUser?: an
     finalQuery.userId = currentUser._id;
   }
 
+  finalQuery.logoutAt = { $ne: null };
+
   const LogsQuery = new QueryBuilder(Logs.find().populate("userId","name"), finalQuery)
     .search(LogsSearchableFields)
     .filter(finalQuery)
