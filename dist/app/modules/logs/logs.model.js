@@ -28,12 +28,18 @@ const LogsSchema = new mongoose_1.Schema({
     userId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
     action: {
         type: String,
-        enum: ["login", "logout"],
+        enum: ["clockIn", "clockOut", "break"],
         default: "login",
     },
     description: { type: String },
-    loginAt: { type: Date },
-    logoutAt: { type: Date },
+    breaks: [
+        {
+            breakStart: { type: Date },
+            breakEnd: { type: Date },
+        },
+    ],
+    clockIn: { type: Date },
+    clockOut: { type: Date },
 }, {
     timestamps: true,
 });

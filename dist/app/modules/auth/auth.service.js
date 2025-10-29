@@ -17,14 +17,14 @@ const http_status_1 = __importDefault(require("http-status"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
 const user_model_1 = require("../user/user.model");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+// import moment from "moment";
+const moment_timezone_1 = __importDefault(require("moment-timezone"));
 const auth_utils_1 = require("./auth.utils");
 const sendEmail_1 = require("../../utils/sendEmail");
 const config_1 = __importDefault(require("../../config"));
-const moment_1 = __importDefault(require("moment"));
-const logs_model_1 = __importDefault(require("../logs/logs.model"));
 function generateOtpAndExpiry() {
     const otp = Math.floor(1000 + Math.random() * 9000).toString();
-    const otpExpiry = (0, moment_1.default)().add(10, "minutes").toDate();
+    const otpExpiry = (0, moment_timezone_1.default)().add(10, "minutes").toDate();
     return { otp, otpExpiry };
 }
 const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function* () {
@@ -65,13 +65,13 @@ const checkLogin = (payload, req) => __awaiter(void 0, void 0, void 0, function*
         const accessToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_access_secret, config_1.default.jwt_access_expires_in);
         const refreshToken = (0, auth_utils_1.createToken)(jwtPayload, config_1.default.jwt_refresh_secret, config_1.default.jwt_refresh_expires_in);
         // ✅ Create login log if user is a teacher
-        if (foundUser.role === "teacher") {
-            yield logs_model_1.default.create({
-                userId: foundUser._id,
-                action: "login",
-                loginAt: (0, moment_1.default)().toDate(),
-            });
-        }
+        // if (foundUser.role === "teacher" || foundUser.role === "admin") {
+        //   await Logs.create({
+        //     userId: foundUser._id,
+        //     action: "login",
+        //      loginAt: moment().tz("Europe/London").toDate(),
+        //   });
+        // }
         return {
             accessToken,
             refreshToken,
@@ -205,7 +205,7 @@ const verifyEmailIntoDB = (email, otp) => __awaiter(void 0, void 0, void 0, func
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Invalid OTP!");
     }
     // Check OTP expiry using moment
-    if (foundUser.otpExpiry && (0, moment_1.default)().isAfter((0, moment_1.default)(foundUser.otpExpiry))) {
+    if (foundUser.otpExpiry && (0, moment_timezone_1.default)().isAfter((0, moment_timezone_1.default)(foundUser.otpExpiry))) {
         throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "OTP has expired");
     }
     // Update user: mark as authorized and clear OTP
@@ -306,8 +306,8 @@ const validateOtp = (email, otp) => __awaiter(void 0, void 0, void 0, function* 
         throw new AppError_1.default(http_status_1.default.UNAUTHORIZED, "Invalid OTP");
     }
     // Check if OTP has expired using moment
-    if ((0, moment_1.default)(passwordReset.otpExpiry).isBefore((0, moment_1.default)())) {
-        console.log("OTP Expired. Expiry Time:", passwordReset.otpExpiry, "Current Time:", (0, moment_1.default)().toDate());
+    if ((0, moment_timezone_1.default)(passwordReset.otpExpiry).isBefore((0, moment_timezone_1.default)())) {
+        console.log("OTP Expired. Expiry Time:", passwordReset.otpExpiry, "Current Time:", (0, moment_timezone_1.default)().toDate());
         throw new AppError_1.default(http_status_1.default.FORBIDDEN, "OTP has expired");
     }
     yield passwordReset.updateOne({ isUsed: true, otp: "" });

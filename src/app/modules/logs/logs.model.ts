@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, CallbackError, Types } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { TLogs } from "./logs.interface";
 
 const LogsSchema = new Schema<TLogs & Document>(
@@ -7,14 +7,21 @@ const LogsSchema = new Schema<TLogs & Document>(
 
     action: {
       type: String,
-      enum: ["login", "logout"],
+      enum: ["clockIn", "clockOut", "break"],
       default: "login",
     },
 
     description: { type: String },
 
-    loginAt: { type: Date },
-    logoutAt: { type: Date },
+    breaks: [
+      {
+        breakStart: { type: Date },
+        breakEnd: { type: Date },
+      },
+    ],
+
+    clockIn: { type: Date },
+    clockOut: { type: Date },
   },
   {
     timestamps: true,

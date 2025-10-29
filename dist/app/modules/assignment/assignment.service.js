@@ -81,7 +81,6 @@ const createAssignmentIntoDB = (payload) => __awaiter(void 0, void 0, void 0, fu
     return result;
 });
 const getTeacherAssignmentFeedbackFromDB = (teacherId, query) => __awaiter(void 0, void 0, void 0, function* () {
-    // 1️⃣ Get all course IDs assigned to the teacher
     const teacherCourses = yield teacherCourse_model_1.default.find({ teacherId }).select("courseId");
     if (!teacherCourses || teacherCourses.length === 0) {
         return {

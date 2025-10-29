@@ -94,13 +94,13 @@ const checkLogin = async (payload: TLogin, req: any) => {
 
 
     // ✅ Create login log if user is a teacher
-    if (foundUser.role === "teacher" || foundUser.role === "admin") {
-      await Logs.create({
-        userId: foundUser._id,
-        action: "login",
-         loginAt: moment().tz("Europe/London").toDate(),
-      });
-    }
+    // if (foundUser.role === "teacher" || foundUser.role === "admin") {
+    //   await Logs.create({
+    //     userId: foundUser._id,
+    //     action: "login",
+    //      loginAt: moment().tz("Europe/London").toDate(),
+    //   });
+    // }
 
 
     

@@ -23,7 +23,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LogsServices = void 0;
+exports.LogsServices = exports.updateLogsIntoDB = void 0;
 const http_status_1 = __importDefault(require("http-status"));
 const QueryBuilder_1 = __importDefault(require("../../builder/QueryBuilder"));
 const AppError_1 = __importDefault(require("../../errors/AppError"));
@@ -37,24 +37,28 @@ const getAllLogsFromDB = (query, currentUser) => __awaiter(void 0, void 0, void 
     const now = (0, moment_1.default)();
     if (!fromDate && !toDate) {
         finalQuery.createdAt = {
-            $gte: now.startOf('month').toDate(),
-            $lte: now.endOf('month').toDate(),
+            $gte: now.startOf("month").toDate(),
+            $lte: now.endOf("month").toDate(),
         };
     }
     else if (fromDate || toDate) {
         const dateFilter = {};
         if (fromDate)
-            dateFilter.$gte = (0, moment_1.default)(fromDate).startOf('day').toDate();
+            dateFilter.$gte = (0, moment_1.default)(fromDate)
+                .startOf("day")
+                .toDate();
         if (toDate)
-            dateFilter.$lte = (0, moment_1.default)(toDate).endOf('day').toDate();
+            dateFilter.$lte = (0, moment_1.default)(toDate)
+                .endOf("day")
+                .toDate();
         finalQuery.createdAt = dateFilter;
     }
     // Handle multiple userIds (comma-separated)
     if (userId) {
-        const userIds = userId.split(',').map(id => id.trim());
+        const userIds = userId.split(",").map((id) => id.trim());
         finalQuery.userId = { $in: userIds };
     }
-    else if ((currentUser === null || currentUser === void 0 ? void 0 : currentUser.role) === 'teacher') {
+    else if ((currentUser === null || currentUser === void 0 ? void 0 : currentUser.role) === "teacher" || (currentUser === null || currentUser === void 0 ? void 0 : currentUser.role) === "admin") {
         // If current user is a teacher, show only their logs by default
         finalQuery.userId = currentUser._id;
     }
@@ -76,25 +80,45 @@ const getSingleLogsFromDB = (id) => __awaiter(void 0, void 0, void 0, function* 
     return result;
 });
 const updateLogsIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, action, logoutAt } = payload;
-    if (!userId || action !== "logout") {
+    const { userId, action, clockOut, break: breakTime } = payload;
+    if (!userId || !action) {
         return null;
     }
-    // Find the latest login log for this user
-    const latestLoginLog = yield logs_model_1.default.findOne({ userId, action: "login" }).sort({
-        createdAt: -1,
-    });
-    if (!latestLoginLog) {
+    // Find the latest log for this user (the most recent session)
+    const latestLog = yield logs_model_1.default.findOne({ userId }).sort({ createdAt: -1 });
+    if (!latestLog) {
         return null;
     }
-    // Update that log entry
-    const result = yield logs_model_1.default.findByIdAndUpdate(latestLoginLog._id, {
-        action: "logout",
-        logoutAt,
-        // description: "User logged out successfully",
-    }, { new: true, runValidators: true });
-    return result;
+    // 🕒 Handle "clockOut"
+    if (action === "clockOut") {
+        latestLog.action = "clockOut";
+        latestLog.clockOut = (clockOut || new Date());
+        yield latestLog.save();
+        return latestLog;
+    }
+    // ☕ Handle "break"
+    if (action === "break") {
+        if (!latestLog.breaks) {
+            latestLog.breaks = [];
+        }
+        const lastBreak = latestLog.breaks[latestLog.breaks.length - 1];
+        // If last break ended OR no break exists → start new break
+        if (!lastBreak || (lastBreak.breakStart && lastBreak.breakEnd)) {
+            latestLog.breaks.push({ breakStart: breakTime || new Date() });
+            // latestLog.description = "Break started";
+        }
+        else {
+            // Otherwise → end current break
+            lastBreak.breakEnd = breakTime || new Date();
+            // latestLog.description = "Break ended";
+        }
+        yield latestLog.save();
+        return latestLog;
+    }
+    // Default: return null for unsupported actions
+    return null;
 });
+exports.updateLogsIntoDB = updateLogsIntoDB;
 const updateLogsByIdIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {
     const logs = yield logs_model_1.default.findById(id);
     if (!logs_model_1.default) {
@@ -113,7 +137,7 @@ const createLogsIntoDB = (payload) => __awaiter(void 0, void 0, void 0, function
 exports.LogsServices = {
     getAllLogsFromDB,
     getSingleLogsFromDB,
-    updateLogsIntoDB,
+    updateLogsIntoDB: exports.updateLogsIntoDB,
     createLogsIntoDB,
-    updateLogsByIdIntoDB
+    updateLogsByIdIntoDB,
 };
