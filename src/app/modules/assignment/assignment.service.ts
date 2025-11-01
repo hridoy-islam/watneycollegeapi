@@ -21,6 +21,10 @@ const getAllAssignmentFromDB = async (query: Record<string, unknown>) => {
         path: "feedbacks.submitBy",
         select: "firstName lastName name email role", // populate teacher/admin details
       },
+       {
+        path: "finalFeedback.submitBy",
+        select: "firstName lastName name email role", // populate teacher/admin details
+      },
       {
         path: "applicationId",
         populate: {
@@ -150,6 +154,84 @@ const courseIds = (teacherCourses as any[]).map(tc => tc.courseId);
 };
 
 
+const getStudentAssignmentFeedbackFromDB = async (
+  studentId: string,
+  query: Record<string, unknown>
+) => {
+ 
+  const AssignmentQuery = new QueryBuilder(
+    Assignment.find({
+      studentId,
+      status: { $in: ["feedback_given", "resubmission_required", "completed"]  },
+    }).populate([
+      {
+        path: "studentId",
+        select: "firstName title initial lastName name email",
+      },
+      {
+        path: "feedbacks.submitBy",
+        select: "firstName lastName name email role", // who gave feedback
+      },
+      {
+        path: "applicationId",
+        populate: {
+          path: "courseId",
+          select: "name",
+        },
+      },
+      {
+        path: "unitId",
+        select: "title",
+      },
+      {
+        path: "unitMaterialId",
+        select: "assignments",
+      },
+    ]),
+    query
+  )
+    .search(AssignmentSearchableFields)
+    .filter(query)
+    .sort()
+    .fields()
+    .paginate();
+
+ 
+  const result = await AssignmentQuery.modelQuery;
+
+  // 🟢 Step 4: Filter out completed assignments that have all feedback seen
+  // Step 4: Filter out completed assignments that have all feedback seen
+const filteredResult = result.filter((assignment: any) => {
+  if (assignment.status === "completed") {
+    // Check normal feedbacks
+    const hasUnseenFeedback = assignment.feedbacks?.some(fb => !fb.seen);
+    // Also check finalFeedback
+    const hasUnseenFinalFeedback = assignment.finalFeedback
+      ? assignment.finalFeedback.seen === false
+      : false;
+
+    return hasUnseenFeedback || hasUnseenFinalFeedback;
+  }
+  return true;
+});
+
+  // 🟢 Step 5: Handle limit and pagination manually (if `limit=all`)
+  const total = filteredResult.length;
+  const page = Number(query.page) || 1;
+  const limitParam =
+    query.limit === "all" ? total : Number(query.limit) || 10;
+
+  const paginatedResult =
+    query.limit === "all"
+      ? filteredResult
+      : filteredResult.slice((page - 1) * limitParam, page * limitParam);
+
+  const totalPage = limitParam > 0 ? Math.ceil(total / limitParam) : 1;
+
+  const meta = { page, limit: limitParam, total, totalPage };
+
+  return { meta, result: paginatedResult };
+};
 
 
 export const AssignmentServices = {
@@ -158,4 +240,5 @@ export const AssignmentServices = {
   updateAssignmentIntoDB,
   createAssignmentIntoDB,
   getTeacherAssignmentFeedbackFromDB,
+  getStudentAssignmentFeedbackFromDB,
 };

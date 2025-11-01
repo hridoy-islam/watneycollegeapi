@@ -24,10 +24,35 @@ const getAllUserFromDB = async (query: Record<string, unknown>) => {
   };
 };
 
-const getSingleUserFromDB = async (id: string) => {
-  const result = await User.findById(id);
+// const getSingleUserFromDB = async (id: string) => {
+//   const result = await User.findById(id);
+//   return result;
+// };
+
+const getSingleUserFromDB = async (id: string, query: Record<string, unknown> = {}) => {
+  // Parse the requested fields from query
+  const fields = typeof query.fields === 'string' 
+    ? query.fields.split(',').map(f => f.trim()).join(' ')
+    : undefined;
+  
+  // Build the query
+  let userQuery = User.findById(id);
+  
+  // Only apply select if fields are provided
+  if (fields) {
+    userQuery = userQuery.select(fields);
+  }
+  
+  const result = await userQuery;
+  
+  if (!result) {
+    throw new AppError(httpStatus.NOT_FOUND, "User not found");
+  }
+  
   return result;
 };
+
+
 
 const updateUserIntoDB = async (id: string, payload: Partial<TUser>) => {
  

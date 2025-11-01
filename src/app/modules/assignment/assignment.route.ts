@@ -28,4 +28,9 @@ router.get(
   AssignmentControllers.getTeacherAssignmentFeedback
 );
 
+router.get(
+  "/student-feedback/:studentId",
+  AssignmentControllers.getStudentAssignmentFeedback
+);
+
 export const AssignmentRoutes = router;

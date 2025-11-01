@@ -60,12 +60,28 @@ const getTeacherAssignmentFeedback= catchAsync(async (req, res) => {
   });
 });
 
+const getStudentAssignmentFeedback = catchAsync(async (req, res) => {
+  const  {studentId}  = req.params;
+  const result = await AssignmentServices.getStudentAssignmentFeedbackFromDB(
+    studentId ,
+    req.body
+  );
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Student assignments with feedback fetched successfully",
+    data: result,
+  });
+});
+
 
 export const AssignmentControllers = {
   getAllAssignment,
   getSingleAssignment,
   updateAssignment,
   createAssignment,
-  getTeacherAssignmentFeedback
+  getTeacherAssignmentFeedback,
+  getStudentAssignmentFeedback
   
 };

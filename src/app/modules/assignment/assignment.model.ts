@@ -29,19 +29,50 @@ const SubmissionSchema = new Schema(
   { timestamps: true }
 );
 
+const FinalFeedbackSchema = new Schema(
+  {
+    submitBy: { type: Types.ObjectId, ref: "User" },
+    files: [{ type: String }],
+    seen: { type: Boolean, default: false },
+    // ✅ Dynamic Learning Outcomes from CourseUnitMaterial
+    learningOutcomes: [
+      {
+        learningOutcomeId: {
+          type: String,
+          required: true, // maps with unitMaterial.learningOutcomes[i]._id
+        },
+        learningOutcomeTitle: { type: String },
+        assessmentCriteria: [
+          {
+            criteriaId: {
+              type: String,
+              required: true, // maps with assessmentCriteria[i]._id
+            },
+            description: { type: String },
+            fulfilled: { type: Boolean, default: false },
+            comment: { type: String },
+          },
+        ],
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
 const AssignmentSchema = new Schema<TAssignment>(
   {
     applicationId: { type: Schema.Types.ObjectId, ref: "ApplicationCourse" },
     unitId: { type: Schema.Types.ObjectId, ref: "CourseUnit" },
     studentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
-    unitMaterialId: { type: Schema.Types.ObjectId, ref: "CourseUnitMaterial",  },
+    unitMaterialId: { type: Schema.Types.ObjectId, ref: "CourseUnitMaterial" },
     // assignmentName: { type: String, required: true },
-    courseMaterialAssignmentId:{ type: String, required: true },
+    courseMaterialAssignmentId: { type: String, required: true },
     // Array of submission attempts
     submissions: [SubmissionSchema],
     requireResubmit: { type: Boolean, default: false },
     feedbacks: [FeedbackSchema],
-
+    finalFeedback: FinalFeedbackSchema,
+    isFinalFeedback: { type: Boolean, default: false },
     // Current assignment status
     status: {
       type: String,
