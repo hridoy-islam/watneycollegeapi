@@ -20,6 +20,8 @@ const ResourceSchema = new Schema<Resource>({
   content: { type: String },
   deadline: { type: Date },
   learningOutcomes: { type: String },
+  finalFeedback:{type:Boolean , default:false},
+  observation:{type:Boolean , default:false},
   assessmentCriteria: { type: [LearningOutcomeItemSchema], default: [] },
 });
 

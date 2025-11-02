@@ -59,6 +59,37 @@ const FinalFeedbackSchema = new Schema(
   { timestamps: true }
 );
 
+
+const observationFeedbackSchema = new Schema(
+  {
+    submitBy: { type: Types.ObjectId, ref: "User" },
+    files: [{ type: String }],
+    seen: { type: Boolean, default: false },
+    // ✅ Dynamic Learning Outcomes from CourseUnitMaterial
+    learningOutcomes: [
+      {
+        learningOutcomeId: {
+          type: String,
+          required: true, // maps with unitMaterial.learningOutcomes[i]._id
+        },
+        learningOutcomeTitle: { type: String },
+        assessmentCriteria: [
+          {
+            criteriaId: {
+              type: String,
+              required: true, // maps with assessmentCriteria[i]._id
+            },
+            description: { type: String },
+            fulfilled: { type: Boolean, default: false },
+            comment: { type: String },
+          },
+        ],
+      },
+    ],
+  },
+  { timestamps: true }
+);
+
 const AssignmentSchema = new Schema<TAssignment>(
   {
     applicationId: { type: Schema.Types.ObjectId, ref: "ApplicationCourse" },
@@ -72,7 +103,9 @@ const AssignmentSchema = new Schema<TAssignment>(
     requireResubmit: { type: Boolean, default: false },
     feedbacks: [FeedbackSchema],
     finalFeedback: FinalFeedbackSchema,
+    observationFeedback: observationFeedbackSchema,
     isFinalFeedback: { type: Boolean, default: false },
+    isObservationFeedback: { type: Boolean, default: false },
     // Current assignment status
     status: {
       type: String,

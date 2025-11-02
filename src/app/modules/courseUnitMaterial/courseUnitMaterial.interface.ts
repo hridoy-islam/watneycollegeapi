@@ -20,6 +20,8 @@ export interface Resource {
   fileUrl?: string;
   fileName?: string;
   deadline?: string;
+  finalFeedback?:boolean;
+  observation?:boolean;
   learningOutcomes?: string;
   assessmentCriteria?: LearningOutcomeItem[];
 }

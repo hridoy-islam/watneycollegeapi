@@ -22,6 +22,10 @@ const getAllAssignmentFromDB = async (query: Record<string, unknown>) => {
         select: "firstName lastName name email role", // populate teacher/admin details
       },
        {
+        path: "observationFeedback.submitBy",
+        select: "firstName lastName name email role", // populate teacher/admin details
+      },
+       {
         path: "finalFeedback.submitBy",
         select: "firstName lastName name email role", // populate teacher/admin details
       },
@@ -205,12 +209,17 @@ const filteredResult = result.filter((assignment: any) => {
   if (assignment.status === "completed") {
     // Check normal feedbacks
     const hasUnseenFeedback = assignment.feedbacks?.some(fb => !fb.seen);
-    // Also check finalFeedback
+    //  check finalFeedback
     const hasUnseenFinalFeedback = assignment.finalFeedback
       ? assignment.finalFeedback.seen === false
       : false;
 
-    return hasUnseenFeedback || hasUnseenFinalFeedback;
+       // Also check observationFeedback
+    const hasUnseenObservationFeedback = assignment.observationFeedback
+      ? assignment.observationFeedback.seen === false
+      : false;
+
+    return hasUnseenFeedback || hasUnseenFinalFeedback || hasUnseenObservationFeedback;
   }
   return true;
 });

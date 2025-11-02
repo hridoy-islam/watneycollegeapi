@@ -54,6 +54,8 @@ export interface TAssignment {
   feedbacks?: TFeedback[];
   finalFeedback?: TFinalFeedback;
   isFinalFeedback?: boolean;
+  observationFeedback?: TFinalFeedback;
+  isObservationFeedback?: boolean;
   status?:
     | "not_submitted"
     | "submitted"
