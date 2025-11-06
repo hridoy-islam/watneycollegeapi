@@ -76,12 +76,73 @@ const getStudentAssignmentFeedback = catchAsync(async (req, res) => {
 });
 
 
+const getSubmittedAssignments = catchAsync(async (req, res) => {
+  // ✅ All IDs come from query parameters
+  const query = req.query;
+
+  const { courseId, termId, unitId } = req.params;
+ 
+  const result = await AssignmentServices.getSubmittedAssignmentsFromDB(courseId,termId,unitId,query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Submitted assignments retrieved successfully",
+    data: result,
+  });
+});
+
+const getFeedbackReceivedAssignments = catchAsync(async (req, res) => {
+  const query = req.query;
+  const { courseId, termId, unitId } = req.params;
+
+  const result = await AssignmentServices.getFeedbackReceivedAssignmentsFromDB(courseId, termId, unitId, query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Assignments with feedback retrieved successfully",
+    data: result,
+  });
+});
+
+const getNotSubmittedAssignments = catchAsync(async (req, res) => {
+  const query = req.query;
+  const { courseId, termId, unitId } = req.params;
+
+  const result = await AssignmentServices.getNotSubmittedAssignmentsFromDB(courseId, termId, unitId, query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Students who did not submit assignments retrieved successfully",
+    data: result,
+  });
+});
+
+const getNoFeedbackAssignments = catchAsync(async (req, res) => {
+  const query = req.query;
+  const { courseId, termId, unitId } = req.params;
+
+  const result = await AssignmentServices.getNoFeedbackAssignmentsFromDB(courseId, termId, unitId, query);
+
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "Students without feedback retrieved successfully",
+    data: result,
+  });
+});
 export const AssignmentControllers = {
   getAllAssignment,
   getSingleAssignment,
   updateAssignment,
   createAssignment,
   getTeacherAssignmentFeedback,
-  getStudentAssignmentFeedback
+  getStudentAssignmentFeedback,
+  getSubmittedAssignments,
+  getNotSubmittedAssignments,
+  getFeedbackReceivedAssignments,
+  getNoFeedbackAssignments,
   
 };

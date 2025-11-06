@@ -33,4 +33,25 @@ router.get(
   AssignmentControllers.getStudentAssignmentFeedback
 );
 
+
+router.get(
+  "/submitted/:courseId/:termId/:unitId",
+  AssignmentControllers.getSubmittedAssignments
+);
+
+router.get(
+  "/with-feedback/:courseId/:termId/:unitId",
+  AssignmentControllers.getFeedbackReceivedAssignments
+);
+
+router.get(
+  "/not-submitted/:courseId/:termId/:unitId",
+  AssignmentControllers.getNotSubmittedAssignments
+);
+
+router.get(
+  "/no-feedback/:courseId/:termId/:unitId",
+  AssignmentControllers.getNoFeedbackAssignments
+);
+
 export const AssignmentRoutes = router;
