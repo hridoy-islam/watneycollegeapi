@@ -80,9 +80,9 @@ const getSubmittedAssignments = catchAsync(async (req, res) => {
   // ✅ All IDs come from query parameters
   const query = req.query;
 
-  const { courseId, termId, unitId } = req.params;
+  const { courseId, termId, unitId,assignmentId } = req.params;
  
-  const result = await AssignmentServices.getSubmittedAssignmentsFromDB(courseId,termId,unitId,query);
+  const result = await AssignmentServices.getSubmittedAssignmentsFromDB(courseId,termId,unitId,assignmentId,query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -94,9 +94,9 @@ const getSubmittedAssignments = catchAsync(async (req, res) => {
 
 const getFeedbackReceivedAssignments = catchAsync(async (req, res) => {
   const query = req.query;
-  const { courseId, termId, unitId } = req.params;
+  const { courseId, termId, unitId,assignmentId } = req.params;
 
-  const result = await AssignmentServices.getFeedbackReceivedAssignmentsFromDB(courseId, termId, unitId, query);
+  const result = await AssignmentServices.getFeedbackReceivedAssignmentsFromDB(courseId, termId, unitId,assignmentId, query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -108,9 +108,9 @@ const getFeedbackReceivedAssignments = catchAsync(async (req, res) => {
 
 const getNotSubmittedAssignments = catchAsync(async (req, res) => {
   const query = req.query;
-  const { courseId, termId, unitId } = req.params;
+  const { courseId, termId, unitId,assignmentId } = req.params;
 
-  const result = await AssignmentServices.getNotSubmittedAssignmentsFromDB(courseId, termId, unitId, query);
+  const result = await AssignmentServices.getNotSubmittedAssignmentsFromDB(courseId, termId, unitId,assignmentId, query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,
@@ -122,9 +122,9 @@ const getNotSubmittedAssignments = catchAsync(async (req, res) => {
 
 const getNoFeedbackAssignments = catchAsync(async (req, res) => {
   const query = req.query;
-  const { courseId, termId, unitId } = req.params;
+  const { courseId, termId, unitId,assignmentId } = req.params;
 
-  const result = await AssignmentServices.getNoFeedbackAssignmentsFromDB(courseId, termId, unitId, query);
+  const result = await AssignmentServices.getNoFeedbackAssignmentsFromDB(courseId, termId, unitId,assignmentId, query);
 
   sendResponse(res, {
     statusCode: httpStatus.OK,

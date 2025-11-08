@@ -35,22 +35,22 @@ router.get(
 
 
 router.get(
-  "/submitted/:courseId/:termId/:unitId",
+  "/submitted/:courseId/:termId/:unitId/:assignmentId",
   AssignmentControllers.getSubmittedAssignments
 );
 
 router.get(
-  "/with-feedback/:courseId/:termId/:unitId",
+  "/with-feedback/:courseId/:termId/:unitId/:assignmentId",
   AssignmentControllers.getFeedbackReceivedAssignments
 );
 
 router.get(
-  "/not-submitted/:courseId/:termId/:unitId",
+  "/not-submitted/:courseId/:termId/:unitId/:assignmentId",
   AssignmentControllers.getNotSubmittedAssignments
 );
 
 router.get(
-  "/no-feedback/:courseId/:termId/:unitId",
+  "/no-feedback/:courseId/:termId/:unitId/:assignmentId",
   AssignmentControllers.getNoFeedbackAssignments
 );
 
