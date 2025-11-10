@@ -66,10 +66,70 @@ const getTeacherAssignmentFeedback = (0, catchAsync_1.default)((req, res) => __a
         data: result,
     });
 }));
+const getStudentAssignmentFeedback = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { studentId } = req.params;
+    const result = yield assignment_service_1.AssignmentServices.getStudentAssignmentFeedbackFromDB(studentId, req.body);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Student assignments with feedback fetched successfully",
+        data: result,
+    });
+}));
+const getSubmittedAssignments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    // ✅ All IDs come from query parameters
+    const query = req.query;
+    const { courseId, termId, unitId, assignmentId } = req.params;
+    const result = yield assignment_service_1.AssignmentServices.getSubmittedAssignmentsFromDB(courseId, termId, unitId, assignmentId, query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Submitted assignments retrieved successfully",
+        data: result,
+    });
+}));
+const getFeedbackReceivedAssignments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query;
+    const { courseId, termId, unitId, assignmentId } = req.params;
+    const result = yield assignment_service_1.AssignmentServices.getFeedbackReceivedAssignmentsFromDB(courseId, termId, unitId, assignmentId, query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Assignments with feedback retrieved successfully",
+        data: result,
+    });
+}));
+const getNotSubmittedAssignments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query;
+    const { courseId, termId, unitId, assignmentId } = req.params;
+    const result = yield assignment_service_1.AssignmentServices.getNotSubmittedAssignmentsFromDB(courseId, termId, unitId, assignmentId, query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Students who did not submit assignments retrieved successfully",
+        data: result,
+    });
+}));
+const getNoFeedbackAssignments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query;
+    const { courseId, termId, unitId, assignmentId } = req.params;
+    const result = yield assignment_service_1.AssignmentServices.getNoFeedbackAssignmentsFromDB(courseId, termId, unitId, assignmentId, query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Students without feedback retrieved successfully",
+        data: result,
+    });
+}));
 exports.AssignmentControllers = {
     getAllAssignment,
     getSingleAssignment,
     updateAssignment,
     createAssignment,
-    getTeacherAssignmentFeedback
+    getTeacherAssignmentFeedback,
+    getStudentAssignmentFeedback,
+    getSubmittedAssignments,
+    getNotSubmittedAssignments,
+    getFeedbackReceivedAssignments,
+    getNoFeedbackAssignments,
 };

@@ -20,6 +20,8 @@ const ResourceSchema = new mongoose_1.Schema({
     content: { type: String },
     deadline: { type: Date },
     learningOutcomes: { type: String },
+    finalFeedback: { type: Boolean, default: false },
+    observation: { type: Boolean, default: false },
     assessmentCriteria: { type: [LearningOutcomeItemSchema], default: [] },
 });
 // Main schema for CourseUnitMaterial

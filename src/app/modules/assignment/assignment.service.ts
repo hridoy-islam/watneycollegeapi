@@ -218,7 +218,7 @@ const getStudentAssignmentFeedbackFromDB = async (
   const filteredResult = result.filter((assignment: any) => {
     if (assignment.status === "completed") {
       // Check normal feedbacks
-      const hasUnseenFeedback = assignment.feedbacks?.some((fb) => !fb.seen);
+      const hasUnseenFeedback = assignment.feedbacks?.some((fb:any) => !fb.seen);
       //  check finalFeedback
       const hasUnseenFinalFeedback = assignment.finalFeedback
         ? assignment.finalFeedback.seen === false
@@ -298,7 +298,7 @@ const getSubmittedAssignmentsFromDB = async (
 
   const filtered = assignments.filter((a) => a.applicationId);
 
-  const result = filtered.map((a) => ({
+  const result = filtered.map((a:any) => ({
     student: {
       _id: a.studentId._id,
       name: `${a.studentId.firstName} ${a.studentId.lastName}`,

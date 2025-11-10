@@ -34,8 +34,25 @@ const getAllUserFromDB = (query) => __awaiter(void 0, void 0, void 0, function* 
         result,
     };
 });
-const getSingleUserFromDB = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const result = yield user_model_1.User.findById(id);
+// const getSingleUserFromDB = async (id: string) => {
+//   const result = await User.findById(id);
+//   return result;
+// };
+const getSingleUserFromDB = (id, query = {}) => __awaiter(void 0, void 0, void 0, function* () {
+    // Parse the requested fields from query
+    const fields = typeof query.fields === 'string'
+        ? query.fields.split(',').map(f => f.trim()).join(' ')
+        : undefined;
+    // Build the query
+    let userQuery = user_model_1.User.findById(id);
+    // Only apply select if fields are provided
+    if (fields) {
+        userQuery = userQuery.select(fields);
+    }
+    const result = yield userQuery;
+    if (!result) {
+        throw new AppError_1.default(http_status_1.default.NOT_FOUND, "User not found");
+    }
     return result;
 });
 const updateUserIntoDB = (id, payload) => __awaiter(void 0, void 0, void 0, function* () {

@@ -21,17 +21,73 @@ const SubmissionSchema = new mongoose_1.Schema({
         default: "submitted",
     },
 }, { timestamps: true });
+const FinalFeedbackSchema = new mongoose_1.Schema({
+    submitBy: { type: mongoose_1.Types.ObjectId, ref: "User" },
+    files: [{ type: String }],
+    seen: { type: Boolean, default: false },
+    // ✅ Dynamic Learning Outcomes from CourseUnitMaterial
+    learningOutcomes: [
+        {
+            learningOutcomeId: {
+                type: String,
+                required: true, // maps with unitMaterial.learningOutcomes[i]._id
+            },
+            learningOutcomeTitle: { type: String },
+            assessmentCriteria: [
+                {
+                    criteriaId: {
+                        type: String,
+                        required: true, // maps with assessmentCriteria[i]._id
+                    },
+                    description: { type: String },
+                    fulfilled: { type: Boolean, default: false },
+                    comment: { type: String },
+                },
+            ],
+        },
+    ],
+}, { timestamps: true });
+const observationFeedbackSchema = new mongoose_1.Schema({
+    submitBy: { type: mongoose_1.Types.ObjectId, ref: "User" },
+    files: [{ type: String }],
+    seen: { type: Boolean, default: false },
+    // ✅ Dynamic Learning Outcomes from CourseUnitMaterial
+    learningOutcomes: [
+        {
+            learningOutcomeId: {
+                type: String,
+                required: true, // maps with unitMaterial.learningOutcomes[i]._id
+            },
+            learningOutcomeTitle: { type: String },
+            assessmentCriteria: [
+                {
+                    criteriaId: {
+                        type: String,
+                        required: true, // maps with assessmentCriteria[i]._id
+                    },
+                    description: { type: String },
+                    fulfilled: { type: Boolean, default: false },
+                    comment: { type: String },
+                },
+            ],
+        },
+    ],
+}, { timestamps: true });
 const AssignmentSchema = new mongoose_1.Schema({
     applicationId: { type: mongoose_1.Schema.Types.ObjectId, ref: "ApplicationCourse" },
     unitId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnit" },
     studentId: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-    unitMaterialId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnitMaterial", },
+    unitMaterialId: { type: mongoose_1.Schema.Types.ObjectId, ref: "CourseUnitMaterial" },
     // assignmentName: { type: String, required: true },
     courseMaterialAssignmentId: { type: String, required: true },
     // Array of submission attempts
     submissions: [SubmissionSchema],
     requireResubmit: { type: Boolean, default: false },
     feedbacks: [FeedbackSchema],
+    finalFeedback: FinalFeedbackSchema,
+    observationFeedback: observationFeedbackSchema,
+    isFinalFeedback: { type: Boolean, default: false },
+    isObservationFeedback: { type: Boolean, default: false },
     // Current assignment status
     status: {
         type: String,
