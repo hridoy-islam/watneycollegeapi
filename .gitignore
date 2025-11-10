@@ -1,6 +1,6 @@
 node_modules
-# dist
-# /dist
+dist
+/dist
 .env
 .env local
 work.json
