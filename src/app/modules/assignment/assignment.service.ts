@@ -69,12 +69,186 @@ import { Types } from "mongoose";
 
 
 
-const getAllAssignmentFromDB = async (query: Record<string, any>) => {
-  let assignmentQuery: Record<string, any> = { ...query };
+// const getAllAssignmentFromDB = async (query: Record<string, any>) => {
+//   let assignmentQuery: Record<string, any> = {};
 
-  // Check if courseId, termId, unitId, and assignmentId are present
-  if (query.courseId && query.termId && query.unitId && query.assignmentId && query.status === 'submitted') {
-    // Find all applications for the course + term
+//   // ✅ Include all necessary filters
+//   const allowedFilters = [
+//     "courseId",
+//     "termId",
+//     "unitId",
+//     "assignmentId",
+//     "status",
+//     "applicationId",
+//     "studentId",
+//   ];
+
+//   for (const key of allowedFilters) {
+//     if (query[key]) {
+//       assignmentQuery[key] = query[key];
+//     }
+//   }
+
+//   // ✅ Handle special case for a student's assignment within a unit
+//   if (query.applicationId && query.unitId && query.studentId) {
+//     assignmentQuery = {
+//       applicationId: query.applicationId,
+//       unitId: query.unitId,
+//       studentId: query.studentId,
+//     };
+//   }
+
+//   // 🧩 Handle "submitted" special case
+//   if (
+//     query.courseId &&
+//     query.termId &&
+//     query.unitId &&
+//     query.assignmentId &&
+//     query.status === "submitted"
+//   ) {
+//     const applicationCourses = await ApplicationCourse.find({
+//       courseId: query.courseId,
+//       intakeId: query.termId,
+//     }).select("_id");
+
+//     const applicationIds = applicationCourses.map((ac) => ac._id);
+
+//     assignmentQuery = {
+//       courseMaterialAssignmentId: query.assignmentId,
+//       applicationId: { $in: applicationIds },
+//       unitId: query.unitId,
+//       status: query.status,
+//     };
+//   }
+
+//   // 🧩 Main query
+//   let AssignmentQuery = new QueryBuilder(
+//     Assignment.find().populate([
+//       {
+//         path: "studentId",
+//         select: "firstName title initial lastName name email",
+//       },
+//       {
+//         path: "submissions.submitBy",
+//         select: "firstName lastName name email role",
+//       },
+//       {
+//         path: "feedbacks.submitBy",
+//         select: "firstName lastName name email role",
+//       },
+//       {
+//         path: "observationFeedback.submitBy",
+//         select: "firstName lastName name email role",
+//       },
+//       {
+//         path: "finalFeedback.submitBy",
+//         select: "firstName lastName name email role",
+//       },
+//       {
+//         path: "applicationId",
+//         populate: [
+//           { path: "courseId", select: "name" },
+//           { path: "intakeId", select: "termName" },
+//         ],
+//       },
+//       { path: "unitId", select: "title" },
+//       { path: "unitMaterialId", select: "assignments" },
+//     ]),
+//     assignmentQuery
+//   )
+//     .search(AssignmentSearchableFields)
+//     .filter(assignmentQuery)
+//     .sort()
+//     .fields();
+
+//   // ✅ Apply pagination only if not "all"
+//   if (query.limit !== "all") {
+//     AssignmentQuery = AssignmentQuery.paginate();
+//   }
+
+//   // ✅ Run query
+//   const result = await AssignmentQuery.modelQuery;
+
+//   // ✅ Count total correctly
+//   const totalCount = await Assignment.countDocuments(
+//     AssignmentQuery.queryConditions && Object.keys(AssignmentQuery.queryConditions).length > 0
+//       ? AssignmentQuery.queryConditions
+//       : assignmentQuery
+//   );
+
+//   // ✅ Build meta dynamically
+//   const meta =
+//     query.limit === "all"
+//       ? {
+//           total: totalCount,
+//           page: 1,
+//           limit: totalCount,
+//           totalPage: 1,
+//         }
+//       : await AssignmentQuery.countTotal();
+
+//   return { meta, result };
+// };
+
+
+
+
+interface AssignmentQuery {
+  courseId?: string;
+  termId?: string;
+  unitId?: string;
+  assignmentId?: string;
+  status?: string;
+  applicationId?: string;
+  studentId?: string;
+  limit?: string | number;
+}
+
+interface Meta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPage: number;
+}
+
+export const getAllAssignmentFromDB = async (query: AssignmentQuery) => {
+  let assignmentQuery: Record<string, any> = {};
+
+  // Allowed filters
+  const allowedFilters = [
+    "courseId",
+    "termId",
+    "unitId",
+    "assignmentId",
+    "status",
+    "applicationId",
+    "studentId",
+  ];
+
+  // Build base query from allowed filters
+  for (const key of allowedFilters) {
+    if (query[key as keyof AssignmentQuery]) {
+      assignmentQuery[key] = query[key as keyof AssignmentQuery];
+    }
+  }
+
+  // Special case: fetching specific student's assignment
+  if (query.applicationId && query.unitId && query.studentId) {
+    assignmentQuery = {
+      applicationId: query.applicationId,
+      unitId: query.unitId,
+      studentId: query.studentId,
+    };
+  }
+
+  // Special case: submitted assignments with course & term IDs
+  if (
+    query.courseId &&
+    query.termId &&
+    query.unitId &&
+    query.assignmentId &&
+    query.status === "submitted"
+  ) {
     const applicationCourses = await ApplicationCourse.find({
       courseId: query.courseId,
       intakeId: query.termId,
@@ -82,73 +256,63 @@ const getAllAssignmentFromDB = async (query: Record<string, any>) => {
 
     const applicationIds = applicationCourses.map((ac) => ac._id);
 
-    // Filter assignments by applicationIds, assignmentId, and unitId
     assignmentQuery = {
       courseMaterialAssignmentId: query.assignmentId,
       applicationId: { $in: applicationIds },
       unitId: query.unitId,
-      status: query.status
+      status: query.status,
     };
   }
 
-  const AssignmentQuery = new QueryBuilder(
+  // Build main query with population
+  let AssignmentQuery = new QueryBuilder(
     Assignment.find().populate([
-      {
-        path: "studentId",
-        select: "firstName title initial lastName name email",
-      },
-      {
-        path: "submissions.submitBy",
-        select: "firstName lastName name email role",
-      },
-      {
-        path: "feedbacks.submitBy",
-        select: "firstName lastName name email role",
-      },
-      {
-        path: "observationFeedback.submitBy",
-        select: "firstName lastName name email role",
-      },
-      {
-        path: "finalFeedback.submitBy",
-        select: "firstName lastName name email role",
-      },
+      { path: "studentId", select: "firstName title initial lastName name email" },
+      { path: "submissions.submitBy", select: "firstName lastName name email role" },
+      { path: "feedbacks.submitBy", select: "firstName lastName name email role" },
+      { path: "observationFeedback.submitBy", select: "firstName lastName name email role" },
+      { path: "finalFeedback.submitBy", select: "firstName lastName name email role" },
       {
         path: "applicationId",
-        populate: [{
-          path: "courseId",
-          select: "name",
-        }, {
-          path: "intakeId",
-          select: "termName",
-        }],
+        populate: [
+          { path: "courseId", select: "name" },
+          { path: "intakeId", select: "termName" },
+        ],
       },
-      {
-        path: "unitId",
-        select: "title",
-      },
-      {
-        path: "unitMaterialId",
-        select: "assignments",
-      },
+      { path: "unitId", select: "title" },
+      { path: "unitMaterialId", select: "assignments" },
     ]),
     assignmentQuery
   )
     .search(AssignmentSearchableFields)
     .filter(assignmentQuery)
     .sort()
-    .paginate()
     .fields();
 
-  const meta = await AssignmentQuery.countTotal();
+  // Apply pagination only if limit !== 'all'
+  if (query.limit !== "all") {
+    AssignmentQuery = AssignmentQuery.paginate();
+  }
+
+  // Execute query
   const result = await AssignmentQuery.modelQuery;
 
-  return {
-    meta,
-    result,
-  };
-};
+  // Count total using assignmentQuery directly
+  const totalCount = await Assignment.countDocuments(assignmentQuery);
 
+  // Build meta
+  const meta: Meta =
+    query.limit === "all"
+      ? {
+          total: totalCount,
+          page: 1,
+          limit: totalCount,
+          totalPage: 1,
+        }
+      : await AssignmentQuery.countTotal();
+
+  return { meta, result };
+};
 
 
 const getSingleAssignmentFromDB = async (id: string) => {
@@ -924,6 +1088,95 @@ const getNoFeedbackAssignmentsFromDB = async (
 };
 
 
+
+
+
+
+
+// Students who require resubmission (status = resubmission_required)
+const getResubmissionAssignmentsFromDB = async (
+  courseId: string,
+  termId: string,
+  unitId: string,
+  assignmentId: string,
+  query: Record<string, unknown>
+) => {
+  if (!courseId || !termId || !unitId || !assignmentId) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Missing required parameters");
+  }
+
+  // ✅ Step 1: Filter only resubmission-required assignments
+  const resubmissionFilter = {
+    unitId,
+    courseMaterialAssignmentId: assignmentId,
+    requireResubmit: true,
+    status: "resubmission_required",
+  };
+
+  // ✅ Step 2: Total enrolled students
+  const totalApplications = await ApplicationCourse.countDocuments({
+    courseId,
+    intakeId: termId,
+    status: "approved",
+  });
+
+  // ✅ Step 3: Total assignments marked for resubmission
+  const totalResubmissionAssignments = await Assignment.countDocuments(resubmissionFilter);
+
+  // ✅ Step 4: Query with population
+  const AssignmentQuery = new QueryBuilder(
+    Assignment.find(resubmissionFilter).populate([
+      { path: "studentId", select: "firstName lastName email" },
+      { path: "unitId", select: "title" },
+      { path: "feedbacks.submitBy", select: "firstName lastName name email role" },
+      {
+        path: "applicationId",
+        populate: [
+          { path: "courseId", select: "name" },
+          { path: "intakeId", select: "termName" },
+        ],
+        match: { courseId, intakeId: termId },
+      },
+    ]),
+    query
+  )
+    .filter(query)
+    .sort()
+    .fields()
+    .paginate();
+
+  const result = await AssignmentQuery.modelQuery;
+
+  // ✅ Step 5: Process assignments
+  const processed = result.map((assignment: any) => {
+    assignment.submissions?.sort(
+      (a: any, b: any) => moment(b.createdAt).valueOf() - moment(a.createdAt).valueOf()
+    );
+
+    const latestSubmission = assignment.submissions?.[0] || null;
+    assignment.latestSubmission = latestSubmission;
+
+    assignment.feedbacks?.sort(
+      (a: any, b: any) => moment(b.createdAt).valueOf() - moment(a.createdAt).valueOf()
+    );
+
+    const latestFeedback = assignment.feedbacks?.[0] || null;
+    assignment.latestFeedback = latestFeedback || null;
+
+    return assignment;
+  });
+
+  // ✅ Step 6: Meta summary
+  const meta = {
+    totalStudents: totalApplications,
+    totalResubmissionAssignments: totalResubmissionAssignments,
+  };
+
+  return { meta, result: processed };
+};
+
+
+
 export const AssignmentServices = {
   getAllAssignmentFromDB,
   getSingleAssignmentFromDB,
@@ -935,4 +1188,5 @@ export const AssignmentServices = {
   getNotSubmittedAssignmentsFromDB,
   getFeedbackReceivedAssignmentsFromDB,
   getNoFeedbackAssignmentsFromDB,
+  getResubmissionAssignmentsFromDB
 };

@@ -54,4 +54,9 @@ router.get(
   AssignmentControllers.getNoFeedbackAssignments
 );
 
+router.get(
+  "/resubmission-feedback/:courseId/:termId/:unitId/:assignmentId",
+  AssignmentControllers.getResubmissionAssignments
+);
+
 export const AssignmentRoutes = router;
