@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "build": "tsc && if [ -d src/app/static ]; then cp -r src/app/static dist/app/; fi",
+    "build": "tsc && shx cp -r src/app/static dist/app/ || echo 'No static folder found'",
     "lint": "eslint src --ignore-path .eslintignore --ext .ts",
     "lint:fix": "npx eslint src --fix",
     "prettier": "prettier --ignore-path .gitignore --write \"./src/**/*.+(js|ts|json)\"",
@@ -62,6 +62,7 @@
     "eslint-config-prettier": "^9.0.0",
     "husky": "^8.0.0",
     "prettier": "^3.1.0",
+    "shx": "^0.4.0",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.2.2"
   }

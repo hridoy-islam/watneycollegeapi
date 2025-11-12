@@ -19,6 +19,7 @@ import { CourseUnitMaterialRoutes } from "../modules/courseUnitMaterial/courseUn
 import { CourseDocumentRoutes } from "../modules/courseDocument/courseDocument.route";
 import { TeacherCourseRoutes } from "../modules/teacherCourse/teacherCourse.route";
 import { LogsRoutes } from "../modules/logs/logs.route";
+import { VerifyRoutes } from "../modules/verify/verify.route";
 
 const router = Router();
 
@@ -97,6 +98,10 @@ const moduleRoutes = [
   {
     path: "/logs",
     route: LogsRoutes,
+  },
+    {
+    path: "/verification",
+    route: VerifyRoutes,
   },
 ];
 
