@@ -284,6 +284,7 @@ export interface TUser {
 
   // Compliance
   startDateInUK?: Date;
+  firstEnterDate?: Date;
   niNumber?: string;
   immigrationStatus?: string;
   ltrCode?: string;
@@ -297,6 +298,15 @@ export interface TUser {
   visaRefusal?: string;
   visaRefusalDetail?: string;
   hearAboutUs?: string;
+
+
+  ethnicityGroup:string;
+  ethnicityValue:string;
+  ethnicityOther:string;
+  religion:string;
+  sexualOrientation:string;
+  genderIdentitySameAtBirth:string;
+
 
   // Documents
   hasPassport?: boolean;

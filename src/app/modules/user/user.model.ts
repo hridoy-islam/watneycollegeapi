@@ -171,6 +171,7 @@ const userSchema = new Schema<TUser, UserModel>(
 
     // Compliance
     startDateInUK: { type: Date },
+    firstEnterDate: { type: Date },
     niNumber: { type: String },
     immigrationStatus: { type: String },
     ltrCode: { type: String },
@@ -201,6 +202,14 @@ const userSchema = new Schema<TUser, UserModel>(
     otherDocuments: { type: [String], default: [] },
     otherDocumentsDescription: { type: String },
 
+
+    ethnicityGroup: { type: String },
+    ethnicityValue: { type: String },
+    ethnicityOther: { type: String },
+    religion: { type: String },
+    sexualOrientation: { type: String },
+    genderIdentitySameAtBirth: { type: String },
+
     // Employment
     isEmployed: { type: String },
     currentEmployment: {
@@ -220,6 +229,7 @@ const userSchema = new Schema<TUser, UserModel>(
         jobTitle: { type: String },
         startDate: { type: String },
         endDate: { type: String },
+        employmentType: { type: String },
         reasonForLeaving: { type: String },
         responsibilities: { type: String },
         contactPermission: { type: String },
@@ -281,19 +291,15 @@ const userSchema = new Schema<TUser, UserModel>(
     termsAccepted: { type: Boolean },
     referee1: {
       name: { type: String },
-      organisation: { type: String },
       address: { type: String },
-      relationship: { type: String },
-      otherRelationship: { type: String },
+      postCode: { type: String },
       email: { type: String },
       phone: { type: String },
     },
     referee2: {
       name: { type: String },
-      organisation: { type: String },
       address: { type: String },
-      relationship: { type: String },
-      otherRelationship: { type: String },
+      postCode: { type: String },
       email: { type: String },
       phone: { type: String },
     },

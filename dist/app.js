@@ -64,8 +64,10 @@ app.use("/uploads", express_1.default.static("uploads"));
 app.use((0, cors_1.default)({
     origin: [
         "http://localhost:5173",
+        "http://localhost:3001",
         "https://watneycollegeform.netlify.app",
         "https://app.watneycollege.co.uk",
+        "https://www.watneycollege.co.uk"
     ],
     credentials: true,
 }));

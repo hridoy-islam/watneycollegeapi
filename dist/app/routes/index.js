@@ -19,6 +19,7 @@ const courseUnitMaterial_route_1 = require("../modules/courseUnitMaterial/course
 const courseDocument_route_1 = require("../modules/courseDocument/courseDocument.route");
 const teacherCourse_route_1 = require("../modules/teacherCourse/teacherCourse.route");
 const logs_route_1 = require("../modules/logs/logs.route");
+const verify_route_1 = require("../modules/verify/verify.route");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -92,6 +93,10 @@ const moduleRoutes = [
     {
         path: "/logs",
         route: logs_route_1.LogsRoutes,
+    },
+    {
+        path: "/verification",
+        route: verify_route_1.VerifyRoutes,
     },
 ];
 moduleRoutes.forEach((route) => router.use(route.path, route.route));

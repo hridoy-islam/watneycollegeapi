@@ -110,6 +110,17 @@ const getNotSubmittedAssignments = (0, catchAsync_1.default)((req, res) => __awa
         data: result,
     });
 }));
+const getResubmissionAssignments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const query = req.query;
+    const { courseId, termId, unitId, assignmentId } = req.params;
+    const result = yield assignment_service_1.AssignmentServices.getResubmissionAssignmentsFromDB(courseId, termId, unitId, assignmentId, query);
+    (0, sendResponse_1.default)(res, {
+        statusCode: http_status_1.default.OK,
+        success: true,
+        message: "Students who did not resubmit assignments retrieved successfully",
+        data: result,
+    });
+}));
 const getNoFeedbackAssignments = (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const query = req.query;
     const { courseId, termId, unitId, assignmentId } = req.params;
@@ -132,4 +143,5 @@ exports.AssignmentControllers = {
     getNotSubmittedAssignments,
     getFeedbackReceivedAssignments,
     getNoFeedbackAssignments,
+    getResubmissionAssignments
 };

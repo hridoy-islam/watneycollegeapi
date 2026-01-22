@@ -18,4 +18,5 @@ router.get("/submitted/:courseId/:termId/:unitId/:assignmentId", assignment_cont
 router.get("/with-feedback/:courseId/:termId/:unitId/:assignmentId", assignment_controller_1.AssignmentControllers.getFeedbackReceivedAssignments);
 router.get("/not-submitted/:courseId/:termId/:unitId/:assignmentId", assignment_controller_1.AssignmentControllers.getNotSubmittedAssignments);
 router.get("/no-feedback/:courseId/:termId/:unitId/:assignmentId", assignment_controller_1.AssignmentControllers.getNoFeedbackAssignments);
+router.get("/resubmission-feedback/:courseId/:termId/:unitId/:assignmentId", assignment_controller_1.AssignmentControllers.getResubmissionAssignments);
 exports.AssignmentRoutes = router;
