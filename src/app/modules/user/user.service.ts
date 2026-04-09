@@ -66,6 +66,26 @@ if (payload.password) {
       Number(config.bcrypt_salt_rounds)
     );
   }
+
+  // Check if any part of the name is being updated
+  const isNameUpdating = 
+    payload.title !== undefined || 
+    payload.firstName !== undefined || 
+    payload.initial !== undefined || 
+    payload.lastName !== undefined;
+
+  if (isNameUpdating) {
+    // Merge the incoming payload data with the existing user data
+    const title = payload.title !== undefined ? payload.title : user.title;
+    const firstName = payload.firstName !== undefined ? payload.firstName : user.firstName;
+    const initial = payload.initial !== undefined ? payload.initial : user.initial;
+    const lastName = payload.lastName !== undefined ? payload.lastName : user.lastName;
+
+    // Filter out undefined/empty values and join them with a single space
+    payload.name = [title, firstName, initial, lastName].filter(Boolean).join(" ");
+  }
+
+  
   const result = await User.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
