@@ -61,11 +61,23 @@ const getAllTeacherStudentApplications: RequestHandler = catchAsync(async (req, 
 });
 
 
+const ExportData: RequestHandler = catchAsync(async (req, res) => {
+  const result = await ApplicationCourseServices.ExportDataFromDB(req.query);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: "ApplicationCourses exported successfully",
+    data: result,
+  });
+});
+
+
 export const ApplicationCourseControllers = {
   getAllApplicationCourse,
   getSingleApplicationCourse,
   updateApplicationCourse,
   createApplicationCourse,
-  getAllTeacherStudentApplications
+  getAllTeacherStudentApplications,
+  ExportData
   
 };

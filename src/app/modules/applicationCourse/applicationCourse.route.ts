@@ -14,6 +14,10 @@ router.post(
   ApplicationCourseControllers.createApplicationCourse
 );
 router.get(
+  "/export",
+  ApplicationCourseControllers.ExportData
+);
+router.get(
   "/:id",
   ApplicationCourseControllers.getSingleApplicationCourse
 );
@@ -27,6 +31,7 @@ router.get(
   "/teacher/:id",
   ApplicationCourseControllers.getAllTeacherStudentApplications
 );
+
 
 
 export const ApplicationCourseRoutes = router;

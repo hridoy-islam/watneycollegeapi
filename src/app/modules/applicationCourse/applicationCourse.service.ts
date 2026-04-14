@@ -716,10 +716,140 @@ const getAllTeacherStudentApplicationsFromDb = async (
 };
 
 
+
+const ExportDataFromDB = async (
+  query: Record<string, unknown>
+) => {
+  const { searchTerm, ...otherQueryParams } = query;
+
+  // Always restrict to students with isCompleted: true
+  let eligibleStudentIds = [];
+
+  // Fetch all student IDs where isCompleted is true
+  const completedStudents = await User.find(
+    { isCompleted: true },
+    { _id: 1 }
+  ).lean();
+  eligibleStudentIds = completedStudents.map(u => u._id);
+
+  // If no completed students, return empty result early
+  if (eligibleStudentIds.length === 0) {
+    return {
+      meta: { total: 0 },
+      result: [],
+    };
+  }
+
+  let studentIdsToFilter = [...eligibleStudentIds];
+
+  // If searchTerm is provided, further narrow down by search
+  if (searchTerm) {
+    const nameSearchConditions = [];
+    const searchTerms = String(searchTerm).trim().split(/\s+/);
+
+    if (searchTerms.length === 1) {
+      const term = searchTerms[0];
+      nameSearchConditions.push(
+        { email: { $regex: term, $options: "i" } },
+        { firstName: { $regex: term, $options: "i" } },
+        { lastName: { $regex: term, $options: "i" } },
+        { title: { $regex: term, $options: "i" } },
+        { initial: { $regex: term, $options: "i" } },
+        { name: { $regex: term, $options: "i" } }
+      );
+    } else if (searchTerms.length === 2) {
+      const [first, second] = searchTerms;
+      nameSearchConditions.push(
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { lastName: { $regex: second, $options: "i" } }] },
+        { $and: [{ title: { $regex: first, $options: "i" } }, { firstName: { $regex: second, $options: "i" } }] },
+        { $and: [{ firstName: { $regex: first, $options: "i" } }, { initial: { $regex: second, $options: "i" } }] }
+      );
+    } else if (searchTerms.length === 3) {
+      const [first, second, third] = searchTerms;
+      nameSearchConditions.push(
+        { $and: [
+            { title: { $regex: first, $options: "i" } },
+            { firstName: { $regex: second, $options: "i" } },
+            { lastName: { $regex: third, $options: "i" } }
+          ]
+        },
+        { $and: [
+            { firstName: { $regex: first, $options: "i" } },
+            { initial: { $regex: second, $options: "i" } },
+            { lastName: { $regex: third, $options: "i" } }
+          ]
+        }
+      );
+    } else if (searchTerms.length >= 4) {
+      const [first, second, third, fourth] = searchTerms;
+      nameSearchConditions.push({
+        $and: [
+          { title: { $regex: first, $options: "i" } },
+          { firstName: { $regex: second, $options: "i" } },
+          { initial: { $regex: third, $options: "i" } },
+          { lastName: { $regex: fourth, $options: "i" } }
+        ]
+      });
+    }
+
+    // Also search full term in individual fields
+    nameSearchConditions.push(
+      { email: { $regex: searchTerm, $options: "i" } },
+      { firstName: { $regex: searchTerm, $options: "i" } },
+      { lastName: { $regex: searchTerm, $options: "i" } },
+      { title: { $regex: searchTerm, $options: "i" } },
+      { initial: { $regex: searchTerm, $options: "i" } },
+      { name: { $regex: searchTerm, $options: "i" } }
+    );
+
+    // Search only among completed students
+    const matchingUsers = await User.find({
+      $and: [
+        { _id: { $in: eligibleStudentIds } }, // Only completed students
+        { $or: nameSearchConditions }
+      ]
+    }).select('_id');
+
+    studentIdsToFilter = matchingUsers.map(user => user._id);
+
+    // If no matches, return empty
+    if (studentIdsToFilter.length === 0) {
+      return {
+        meta: { total: 0 },
+        result: [],
+      };
+    }
+  }
+
+  // Now build ApplicationCourse query restricted to eligible (and optionally searched) students
+  const applicationCourseQuery = new QueryBuilder(
+    ApplicationCourse.find({
+      studentId: { $in: studentIdsToFilter }
+    })
+      .populate("studentId") // Populates the FULL student data from the User model
+      .populate("intakeId")
+      .populate("courseId"),
+    otherQueryParams
+  )
+    .filter(otherQueryParams)
+    .sort()
+    // .paginate() is removed to return the full dataset
+    .fields();
+
+  const result = await applicationCourseQuery.modelQuery;
+  
+  // Return simple meta indicating the total records exported
+  return {
+    meta: { total: result.length },
+    result,
+  };
+};
+
 export const ApplicationCourseServices = {
   getAllApplicationCourseFromDB,
   getSingleApplicationCourseFromDB,
   updateApplicationCourseIntoDB,
   createApplicationCourseIntoDB,
-  getAllTeacherStudentApplicationsFromDb
+  getAllTeacherStudentApplicationsFromDb,
+  ExportDataFromDB,
 };
