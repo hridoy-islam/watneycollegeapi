@@ -211,28 +211,130 @@ interface Meta {
   totalPage: number;
 }
 
-export const getAllAssignmentFromDB = async (query: AssignmentQuery) => {
+// export const getAllAssignmentFromDB = async (query: AssignmentQuery) => {
+//   let assignmentQuery: Record<string, any> = {};
+
+//   // Allowed filters
+//   const allowedFilters = [
+//     "courseId",
+//     "termId",
+//     "unitId",
+//     "assignmentId",
+//     "status",
+//     "applicationId",
+//     "studentId",
+//   ];
+
+//   // Build base query from allowed filters
+//   for (const key of allowedFilters) {
+//     if (query[key as keyof AssignmentQuery]) {
+//       assignmentQuery[key] = query[key as keyof AssignmentQuery];
+//     }
+//   }
+
+//   // Special case: fetching specific student's assignment
+//   if (query.applicationId && query.unitId && query.studentId) {
+//     assignmentQuery = {
+//       applicationId: query.applicationId,
+//       unitId: query.unitId,
+//       studentId: query.studentId,
+//     };
+//   }
+
+//   // Special case: submitted assignments with course & term IDs
+//   if (
+//     query.courseId &&
+//     query.termId &&
+//     query.unitId &&
+//     query.assignmentId &&
+//     query.status === "submitted"
+//   ) {
+//     const applicationCourses = await ApplicationCourse.find({
+//       courseId: query.courseId,
+//       intakeId: query.termId,
+//     }).select("_id");
+
+//     const applicationIds = applicationCourses.map((ac) => ac._id);
+
+//     assignmentQuery = {
+//       courseMaterialAssignmentId: query.assignmentId,
+//       applicationId: { $in: applicationIds },
+//       unitId: query.unitId,
+//       status: query.status,
+//     };
+//   }
+
+//   // Build main query with population
+//   let AssignmentQuery = new QueryBuilder(
+//     Assignment.find().populate([
+//       { path: "studentId", select: "firstName title initial lastName name email" },
+//       { path: "submissions.submitBy", select: "firstName lastName name email role" },
+//       { path: "feedbacks.submitBy", select: "firstName lastName name email role" },
+//       { path: "observationFeedback.submitBy", select: "firstName lastName name email role" },
+//       { path: "finalFeedback.submitBy", select: "firstName lastName name email role" },
+//       {
+//         path: "applicationId",
+//         populate: [
+//           { path: "courseId", select: "name" },
+//           { path: "intakeId", select: "termName" },
+//         ],
+//       },
+//       { path: "unitId", select: "title" },
+//       { path: "unitMaterialId", select: "assignments" },
+//     ]),
+//     assignmentQuery
+//   )
+//     .search(AssignmentSearchableFields)
+//     .filter(assignmentQuery)
+//     .sort()
+//     .fields();
+
+//   // Apply pagination only if limit !== 'all'
+//   if (query.limit !== "all") {
+//     AssignmentQuery = AssignmentQuery.paginate();
+//   }
+
+//   // Execute query
+//   const result = await AssignmentQuery.modelQuery;
+
+//   // Count total using assignmentQuery directly
+//   const totalCount = await Assignment.countDocuments(assignmentQuery);
+
+//   // Build meta
+//   const meta: Meta =
+//     query.limit === "all"
+//       ? {
+//           total: totalCount,
+//           page: 1,
+//           limit: totalCount,
+//           totalPage: 1,
+//         }
+//       : await AssignmentQuery.countTotal();
+
+//   return { meta, result };
+// };
+
+
+export const getAllAssignmentFromDB = async (query: Record<string, unknown>) => {
   let assignmentQuery: Record<string, any> = {};
 
-  // Allowed filters
+  // 1. Allowed base filters
   const allowedFilters = [
-    "courseId",
-    "termId",
-    "unitId",
-    "assignmentId",
     "status",
     "applicationId",
     "studentId",
+    "unitId",
+    "assignmentId",
   ];
+  // NOTE: courseId, termId intentionally excluded here — handled below via lookup
 
-  // Build base query from allowed filters
   for (const key of allowedFilters) {
-    if (query[key as keyof AssignmentQuery]) {
-      assignmentQuery[key] = query[key as keyof AssignmentQuery];
+    if (query[key]) {
+      assignmentQuery[key] = query[key];
     }
   }
 
-  // Special case: fetching specific student's assignment
+  // 2. Special case: specific student by applicationId + unitId + studentId
   if (query.applicationId && query.unitId && query.studentId) {
     assignmentQuery = {
       applicationId: query.applicationId,
@@ -241,32 +343,40 @@ export const getAllAssignmentFromDB = async (query: AssignmentQuery) => {
     };
   }
 
-  // Special case: submitted assignments with course & term IDs
-  if (
-    query.courseId &&
-    query.termId &&
-    query.unitId &&
-    query.assignmentId &&
-    query.status === "submitted"
-  ) {
-    const applicationCourses = await ApplicationCourse.find({
+  // 3. Special case: courseId present → must resolve applicationIds via lookup
+  //    termId is optional — if provided, it narrows the lookup further
+  else if (query.courseId) {
+    const courseFilter: Record<string, any> = {
       courseId: query.courseId,
-      intakeId: query.termId,
-    }).select("_id");
+    };
 
+    // Only filter by term if provided
+    if (query.termId) {
+      courseFilter.intakeId = query.termId;
+    }
+
+    const applicationCourses = await ApplicationCourse.find(courseFilter).select("_id");
     const applicationIds = applicationCourses.map((ac) => ac._id);
 
+    // console.log("Found Application IDs:", applicationIds.length);
+
+    // Build query using resolved applicationIds
     assignmentQuery = {
-      courseMaterialAssignmentId: query.assignmentId,
       applicationId: { $in: applicationIds },
-      unitId: query.unitId,
-      status: query.status,
     };
+
+    // Re-apply all other filters
+    if (query.unitId) assignmentQuery.unitId = query.unitId;
+    if (query.assignmentId) assignmentQuery.courseMaterialAssignmentId = query.assignmentId;
+    if (query.status) assignmentQuery.status = query.status;
+    if (query.studentId) assignmentQuery.studentId = query.studentId;
   }
 
-  // Build main query with population
+  // console.log("FINAL MONGO QUERY:", JSON.stringify(assignmentQuery, null, 2));
+
+  // 4. Build query
   let AssignmentQuery = new QueryBuilder(
-    Assignment.find().populate([
+    Assignment.find(assignmentQuery).populate([
       { path: "studentId", select: "firstName title initial lastName name email" },
       { path: "submissions.submitBy", select: "firstName lastName name email role" },
       { path: "feedbacks.submitBy", select: "firstName lastName name email role" },
@@ -282,25 +392,20 @@ export const getAllAssignmentFromDB = async (query: AssignmentQuery) => {
       { path: "unitId", select: "title" },
       { path: "unitMaterialId", select: "assignments" },
     ]),
-    assignmentQuery
+    query
   )
     .search(AssignmentSearchableFields)
-    .filter(assignmentQuery)
     .sort()
     .fields();
 
-  // Apply pagination only if limit !== 'all'
+  // 5. Pagination
   if (query.limit !== "all") {
     AssignmentQuery = AssignmentQuery.paginate();
   }
 
-  // Execute query
   const result = await AssignmentQuery.modelQuery;
-
-  // Count total using assignmentQuery directly
   const totalCount = await Assignment.countDocuments(assignmentQuery);
 
-  // Build meta
   const meta: Meta =
     query.limit === "all"
       ? {
@@ -313,7 +418,6 @@ export const getAllAssignmentFromDB = async (query: AssignmentQuery) => {
 
   return { meta, result };
 };
-
 
 const getSingleAssignmentFromDB = async (id: string) => {
   const result = await Assignment.findById(id);
