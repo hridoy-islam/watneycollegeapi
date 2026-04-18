@@ -16,6 +16,11 @@ router.post(
   auth("admin","teacher"),
   VerifyControllers.VerifyCreate
 );
+
+router.get(
+  "/student",
+  VerifyControllers.getStudentVerify
+);
 router.get(
   "/:id",
   
@@ -35,10 +40,6 @@ router.delete(
 );
 
 
-router.get(
-  "/student/:studentId",
-  VerifyControllers.getStudentVerify
-);
 
 
 

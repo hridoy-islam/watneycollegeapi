@@ -394,7 +394,7 @@ const getAllApplicationCourseFromDB = async (
     })
       .populate({
         path: "studentId",
-        select: "title firstName initial lastName email phone studentType isCompleted",
+        select: "title firstName initial lastName email phone studentType isCompleted dateOfBirth",
       })
       .populate("intakeId")
       .populate("courseId"),
@@ -418,7 +418,7 @@ const getSingleApplicationCourseFromDB = async (id: string) => {
   const result = await ApplicationCourse.findById(id)
     .populate({
       path: "studentId",
-      select: "title firstName initial lastName email phone studentType",
+      select: "title firstName initial lastName email phone studentType dateOfBirth",
     })
     .populate("intakeId")
     .populate("courseId");

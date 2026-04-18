@@ -3,6 +3,7 @@ import catchAsync from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import httpStatus from "http-status";
 import { VerifyServices } from "./verify.service";
+import AppError from "../../errors/AppError";
 
 
 
@@ -38,10 +39,22 @@ const getSingleVerify = catchAsync(async (req, res) => {
 });
 
 const getStudentVerify = catchAsync(async (req, res) => {
-  const { studentId } = req.params;
-    const token = req.headers['x-student-token'];
+  // FIX: Extract from req.query instead of req.params
+  const { lastName, dob } = req.query; 
+  const token = req.headers['x-student-token'];
 
-  const result = await VerifyServices.getStudentVerifyFromWebsite(studentId,token);
+  // Add a safety check to ensure the fields actually exist
+  if (!lastName || !dob) {
+    throw new AppError(httpStatus.BAD_REQUEST, "Missing lastName or dob in query parameters");
+  }
+
+  // Pass them as strings to the service
+  const result = await VerifyServices.getStudentVerifyFromWebsite(
+    lastName as string, 
+    dob as string, 
+    token
+  );
+
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
